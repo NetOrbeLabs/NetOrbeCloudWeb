@@ -984,7 +984,7 @@ async function registerUser() {
     // Register key in worker
     await fetch(`${WORKER_URL}/regs`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "cipher-key": "REPLACE_WITH_CIPHER_KEY" },
+      headers: { "Content-Type": "application/json", "cipher-key": "77ac56c783ad137dcfbda7a59aba49e6efd71cb28f5410d052eef7869224ac82" },
       body: JSON.stringify({ uid, email, sha256Key: key })
     }).catch(()=>{});
     // Init user profile in Firebase
