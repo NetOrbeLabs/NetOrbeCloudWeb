@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetOrbe Cloud — Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #2563eb;
+  --blue-light: #3b82f6;
+  --blue-glow: rgba(37,99,235,0.3);
+  --dark: #05080f;
+  --dark-2: #0a0e1a;
+  --dark-3: #0f1420;
+  --dark-4: #141924;
+  --surface: #111827;
+  --surface-2: #1a2235;
+  --surface-3: #1e2840;
+  --border: rgba(255,255,255,0.07);
+  --border-light: rgba(255,255,255,0.12);
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-faint: #4b5563;
+  --accent: #06b6d4;
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --sidebar-w: 250px;
+  --topbar-h: 64px;
+}
+
+[data-theme="light"] {
+  --dark: #f8fafc;
+  --dark-2: #f1f5f9;
+  --dark-3: #ffffff;
+  --dark-4: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --surface-3: #e2e8f0;
+  --border: rgba(0,0,0,0.08);
+  --border-light: rgba(0,0,0,0.14);
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  display: flex;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 2px; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--dark-2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  height: 100vh; overflow-y: auto;
+  flex-shrink: 0;
+  position: fixed; left: 0; top: 0; z-index: 50;
+  transition: transform 0.3s;
+}
+
+.sidebar-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 1.3rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none; color: var(--text);
+  font-weight: 800; font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+.sidebar-logo .logo-icon {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--blue), var(--accent));
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-section-label {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-faint);
+  padding: 1.25rem 1.25rem 0.4rem;
+}
+
+.nav-group { padding: 0.25rem 0.75rem; }
+
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.6rem 0.75rem; border-radius: var(--radius);
+  color: var(--text-muted); text-decoration: none;
+  font-size: 0.875rem; font-weight: 500;
+  transition: all 0.2s; cursor: pointer;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-link:hover { background: var(--surface); color: var(--text); }
+.nav-link.active {
+  background: rgba(37,99,235,0.12);
+  color: var(--blue-light);
+  border: 1px solid rgba(37,99,235,0.2);
+}
+.nav-link .nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-link .badge {
+  margin-left: auto; background: var(--blue);
+  color: #fff; font-size: 0.65rem; font-weight: 700;
+  padding: 2px 6px; border-radius: 999px;
+}
+
+.sidebar-footer {
+  margin-top: auto; padding: 1rem 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.user-card {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.75rem; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--border);
+}
+.user-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.user-info { overflow: hidden; flex-grow: 1; }
+.user-email-small {
+  font-size: 0.78rem; color: var(--text-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.user-plan-badge {
+  font-size: 0.65rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 999px;
+  background: rgba(37,99,235,0.15); color: var(--blue-light);
+  border: 1px solid rgba(37,99,235,0.2);
+  display: inline-block; margin-top: 2px;
+}
+
+/* ── TOPBAR ── */
+.main-area {
+  margin-left: var(--sidebar-w);
+  flex-grow: 1; display: flex; flex-direction: column;
+  height: 100vh; overflow: hidden;
+}
+
+.topbar {
+  height: var(--topbar-h); background: var(--dark-2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem; flex-shrink: 0;
+}
+.topbar-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+.topbar-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+.btn-icon {
+  width: 36px; height: 36px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); display: flex; align-items: center;
+  justify-content: center; cursor: pointer; color: var(--text-muted);
+  transition: all 0.2s;
+}
+.btn-icon:hover { border-color: var(--blue); color: var(--text); }
+
+/* ── PAGE CONTENT ── */
+.page-content {
+  flex-grow: 1; overflow-y: auto; padding: 1.75rem 2rem;
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── AUTH OVERLAY ── */
+.auth-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--dark);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.auth-overlay.hidden { display: none; }
+
+.auth-box {
+  width: 100%; max-width: 440px;
+  background: var(--dark-3); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 2.5rem;
+}
+.auth-logo {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; margin-bottom: 2rem;
+  font-weight: 900; font-size: 1.4rem; letter-spacing: -0.03em;
+}
+.auth-tabs {
+  display: flex; gap: 0; margin-bottom: 2rem;
+  background: var(--surface); border-radius: var(--radius);
+  padding: 4px;
+}
+.auth-tab {
+  flex: 1; padding: 0.55rem; text-align: center;
+  font-size: 0.88rem; font-weight: 600; border-radius: 8px;
+  cursor: pointer; color: var(--text-muted); transition: all 0.2s;
+}
+.auth-tab.active { background: var(--blue); color: #fff; }
+
+.auth-form { display: none; }
+.auth-form.active { display: block; }
+
+.form-group { margin-bottom: 1rem; }
+.form-label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-muted); }
+.form-input {
+  width: 100%; padding: 0.7rem 0.9rem;
+  background: var(--surface); border: 1px solid var(--border-light);
+  border-radius: var(--radius); color: var(--text);
+  font-size: 0.9rem; transition: border-color 0.2s;
+  font-family: inherit;
+}
+.form-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+.form-input::placeholder { color: var(--text-faint); }
+
+.btn-submit {
+  width: 100%; padding: 0.8rem; margin-top: 0.5rem;
+  background: var(--blue); border: none; color: #fff;
+  font-size: 0.95rem; font-weight: 700; border-radius: var(--radius);
+  cursor: pointer; transition: all 0.2s; font-family: inherit;
+  box-shadow: 0 0 20px var(--blue-glow);
+}
+.btn-submit:hover { background: var(--blue-light); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.status-msg {
+  margin-top: 0.75rem; padding: 0.75rem;
+  border-radius: var(--radius); font-size: 0.85rem;
+  display: none;
+}
+.status-msg.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; display: block; }
+.status-msg.success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; display: block; }
+.status-msg.info { background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.3); color: #93c5fd; display: block; }
+
+/* ── CARDS / GRID ── */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: var(--dark-3); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+}
+.stat-card .label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+.stat-card .value { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; }
+.stat-card .sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+.card {
+  background: var(--dark-3); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.card-title { font-size: 1rem; font-weight: 700; }
+.card-actions { display: flex; gap: 0.5rem; }
+
+/* ── STORAGE BAR ── */
+.storage-bar-wrap { margin-bottom: 1rem; }
+.storage-bar-labels { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.storage-bar-labels span { font-size: 0.8rem; color: var(--text-muted); }
+.storage-bar-labels strong { color: var(--text); }
+.storage-bar-bg {
+  height: 8px; background: var(--surface-2);
+  border-radius: 999px; overflow: hidden;
+}
+.storage-bar-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue), var(--accent));
+  transition: width 0.6s ease;
+}
+.storage-bar-fill.warning { background: linear-gradient(90deg, var(--orange), #ef4444); }
+
+/* ── PLAN BANNER ── */
+.plan-banner {
+  background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2);
+  border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;
+}
+.plan-banner.expired {
+  background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3);
+}
+.plan-banner.warning {
+  background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.3);
+}
+.plan-info .plan-name { font-weight: 800; font-size: 1.1rem; }
+.plan-info .plan-status { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+.plan-info .plan-status.expired { color: #fca5a5; }
+.plan-info .plan-status.warning { color: #fcd34d; }
+
+/* ── BLOCKED OVERLAY ── */
+.blocked-overlay {
+  position: absolute; inset: 0;
+  background: rgba(5,8,15,0.85); backdrop-filter: blur(4px);
+  border-radius: var(--radius-lg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.75rem; z-index: 10;
+}
+.blocked-overlay svg { color: var(--red); }
+.blocked-overlay p { font-size: 0.9rem; color: var(--text-muted); text-align: center; max-width: 260px; }
+.relative { position: relative; }
+
+/* ── DROP ZONE ── */
+.drop-zone {
+  border: 2px dashed var(--border-light); border-radius: var(--radius-lg);
+  padding: 3rem 2rem; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 1rem;
+  text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--blue); background: rgba(37,99,235,0.05);
+}
+.drop-zone .dz-icon { color: var(--text-faint); }
+.drop-zone .dz-title { font-weight: 700; font-size: 1rem; }
+.drop-zone .dz-sub { font-size: 0.85rem; color: var(--text-muted); }
+.drop-zone .dz-highlight { color: var(--blue-light); cursor: pointer; }
+
+/* ── PROGRESS ── */
+.upload-progress {
+  display: none; margin-top: 1rem;
+}
+.progress-bar-bg {
+  height: 6px; background: var(--surface-2);
+  border-radius: 999px; overflow: hidden; margin-bottom: 6px;
+}
+.progress-bar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--blue), var(--accent));
+  border-radius: 999px; transition: width 0.3s;
+}
+.progress-label { font-size: 0.8rem; color: var(--text-muted); }
+
+/* ── FILE LIST ── */
+.file-list { list-style: none; }
+.file-item {
+  display: flex; align-items: center; gap: 0.9rem;
+  padding: 0.85rem 0; border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+.file-item:last-child { border-bottom: none; }
+.file-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 0.7rem; font-weight: 800;
+  color: var(--blue-light); text-transform: uppercase;
+}
+.file-details { flex-grow: 1; overflow: hidden; }
+.file-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+.file-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+
+.btn-sm {
+  padding: 0.35rem 0.75rem; border-radius: 8px;
+  font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; font-family: inherit;
+}
+.btn-sm.ghost {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.btn-sm.ghost:hover { border-color: var(--blue); color: var(--text); }
+.btn-sm.danger {
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);
+  color: #fca5a5;
+}
+.btn-sm.danger:hover { background: rgba(239,68,68,0.15); }
+.btn-sm:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── ADMIN TABLE ── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  text-align: left; font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-faint); padding: 0 0.75rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 0.85rem 0.75rem; border-bottom: 1px solid var(--border);
+  font-size: 0.86rem; color: var(--text-muted);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table td strong { color: var(--text); font-weight: 600; }
+.data-table td .plan-tag {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  font-size: 0.72rem; font-weight: 700;
+}
+.data-table td .plan-tag.free { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+.data-table td .plan-tag.pro { background: rgba(37,99,235,0.15); color: var(--blue-light); }
+.data-table td .plan-tag.business { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+.data-table td .plan-tag.expired { background: rgba(239,68,68,0.12); color: #fca5a5; }
+.data-table td .status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  display: inline-block; margin-right: 5px;
+}
+.status-dot.active { background: var(--green); }
+.status-dot.expired { background: var(--red); }
+.status-dot.warning { background: var(--orange); }
+
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(5,8,15,0.85); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 1.5rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--dark-3); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 2rem;
+  width: 100%; max-width: 480px; position: relative;
+}
+.modal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 1.5rem; }
+.modal-close {
+  position: absolute; top: 1.25rem; right: 1.25rem;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); padding: 4px;
+}
+.modal-close:hover { color: var(--text); }
+
+select.form-input { appearance: none; cursor: pointer; }
+
+/* ── TOAST ── */
+.toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 400; display: flex; flex-direction: column; gap: 0.5rem; }
+.toast {
+  min-width: 280px; padding: 0.85rem 1.25rem;
+  background: var(--dark-3); border: 1px solid var(--border-light);
+  border-radius: var(--radius); font-size: 0.88rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  animation: slideIn 0.3s ease; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.toast.success { border-color: rgba(16,185,129,0.4); }
+.toast.error { border-color: rgba(239,68,68,0.4); }
+.toast.info { border-color: rgba(37,99,235,0.4); }
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+@keyframes fadeOut { to{opacity:0;transform:translateX(100%)} }
+.toast.removing { animation: fadeOut 0.3s ease forwards; }
+
+/* ── MOBILE ── */
+.mobile-menu-btn { display: none; }
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-area { margin-left: 0; }
+  .mobile-menu-btn { display: flex; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 49; }
+  .sidebar-overlay.open { display: block; }
+  .page-content { padding: 1.25rem; }
+}
+
+/* ── SECTION TABS ── */
+.section-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; background: var(--surface); border-radius: var(--radius); padding: 4px; width: fit-content; }
+.section-tab { padding: 0.5rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.2s; white-space: nowrap; }
+.section-tab.active { background: var(--blue); color: #fff; }
+
+/* ── PLAN CARDS ── */
+.plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.plan-card {
+  background: var(--dark-4); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+  cursor: pointer; transition: all 0.25s; position: relative;
+}
+.plan-card:hover { border-color: rgba(37,99,235,0.4); }
+.plan-card.current { border-color: var(--blue); box-shadow: 0 0 25px rgba(37,99,235,0.15); }
+.plan-card .plan-card-badge {
+  position: absolute; top: -10px; left: 1rem;
+  background: var(--blue); color: #fff; font-size: 0.65rem;
+  font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.05em;
+}
+.plan-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: 0.25rem; }
+.plan-card .price { font-size: 2rem; font-weight: 900; letter-spacing: -0.04em; margin: 0.5rem 0; }
+.plan-card .price span { font-size: 0.85rem; color: var(--text-muted); font-weight: 400; }
+.plan-card .plan-storage { font-size: 0.82rem; color: var(--text-muted); }
+.plan-card ul { list-style: none; margin-top: 1rem; }
+.plan-card ul li { font-size: 0.82rem; color: var(--text-muted); padding: 0.3rem 0; display: flex; gap: 7px; align-items: center; }
+.plan-card ul li .ck { color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR OVERLAY MOBILE -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <div class="logo-icon">
+      <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </div>
+    NetOrbe&nbsp;<b style="color:var(--blue-light)">Cloud</b>
+  </a>
+
+  <div style="flex-grow:1; overflow-y:auto;">
+    <div class="sidebar-section-label">Principal</div>
+    <div class="nav-group" id="mainNav">
+      <button class="nav-link active" onclick="goTo('dashboard')">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Panel
+      </button>
+      <button class="nav-link" onclick="goTo('upload')">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Subir Archivo
+      </button>
+      <button class="nav-link" onclick="goTo('files')">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Mis Archivos
+      </button>
+      <button class="nav-link" onclick="goTo('plan')">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Mi Plan
+      </button>
+    </div>
+
+    <div class="sidebar-section-label" id="adminSectionLabel" style="display:none">Administrador</div>
+    <div class="nav-group" id="adminNav" style="display:none">
+      <button class="nav-link" onclick="goTo('admin')">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Dashboard Admin
+        <span class="badge" id="adminBadge">ADM</span>
+      </button>
+      <button class="nav-link" onclick="goTo('admin-users')">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Gestión de Usuarios
+      </button>
+      <button class="nav-link" onclick="goTo('admin-plans')">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Planes & Config
+      </button>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="userAvatarInitial">?</div>
+      <div class="user-info">
+        <div class="user-email-small" id="sidebarEmail">...</div>
+        <span class="user-plan-badge" id="sidebarPlanBadge">Cargando...</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;margin-top:0.6rem;">
+      <button class="btn-icon" style="flex:1;width:auto;" onclick="toggleTheme()" title="Cambiar tema">
+        <svg id="themeIconMoon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg id="themeIconSun" style="display:none" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+      </button>
+      <button class="btn-icon" style="flex:1;width:auto;" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-area">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <button class="btn-icon mobile-menu-btn" onclick="openSidebar()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="topbar-title" id="topbarTitle">Panel</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-icon" onclick="goTo('upload')" title="Subir archivo">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="viewDashboard">
+      <div class="plan-banner" id="planBannerDash">
+        <div class="plan-info">
+          <div class="plan-name" id="planNameDash">Cargando...</div>
+          <div class="plan-status" id="planStatusDash">Verificando estado del plan...</div>
+        </div>
+        <button class="btn-sm ghost" onclick="goTo('plan')">Ver plan</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Archivos subidos</div>
+          <div class="value" id="dashFileCount">—</div>
+          <div class="sub">en tu cuenta</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Almacenamiento usado</div>
+          <div class="value" id="dashStorageUsed">—</div>
+          <div class="sub" id="dashStorageLimit">de — disponible</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Plan activo</div>
+          <div class="value" id="dashPlanName">—</div>
+          <div class="sub" id="dashPlanExpiry">vence: —</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Almacenamiento</span>
+          <span style="font-size:0.8rem;color:var(--text-muted)" id="dashStoragePct">—%</span>
+        </div>
+        <div class="storage-bar-wrap">
+          <div class="storage-bar-labels">
+            <span id="storageBarUsed">0 MB usado</span>
+            <strong id="storageBarTotal">— total</strong>
+          </div>
+          <div class="storage-bar-bg">
+            <div class="storage-bar-fill" id="storageBarFill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Archivos recientes</span>
+          <button class="btn-sm ghost" onclick="goTo('files')">Ver todos</button>
+        </div>
+        <ul class="file-list" id="recentFilesList">
+          <li style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">Cargando archivos...</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="view" id="viewUpload">
+      <div class="card relative" id="uploadCardWrap">
+        <div class="card-header">
+          <span class="card-title">Subir Archivo</span>
+          <span style="font-size:0.8rem;color:var(--text-muted)" id="uploadStorageInfo">—</span>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+          <svg class="dz-icon" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+          <div class="dz-title" id="dzTitle">Arrastra tu archivo aquí</div>
+          <div class="dz-sub">o <span class="dz-highlight" onclick="document.getElementById('fileInput').click()">examina tu dispositivo</span></div>
+          <div class="dz-sub" id="dzLimit">Tamaño máximo: calculando...</div>
+          <input type="file" id="fileInput" style="display:none">
+        </div>
+
+        <div class="upload-progress" id="uploadProgress">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+          <div class="progress-label" id="progressLabel">Subiendo...</div>
+        </div>
+
+        <button id="uploadBtn" onclick="uploadFile()" style="width:100%;margin-top:1.25rem;padding:0.8rem;background:var(--blue);border:none;color:#fff;font-size:0.95rem;font-weight:700;border-radius:var(--radius);cursor:pointer;font-family:inherit;transition:all 0.2s;">
+          Subir a NetOrbe Cloud
+        </button>
+        <div class="status-msg" id="uploadStatus"></div>
+      </div>
+    </div>
+
+    <!-- FILES -->
+    <div class="view" id="viewFiles">
+      <div class="card relative" id="filesCardWrap">
+        <div class="card-header">
+          <span class="card-title">Mis Archivos</span>
+          <div class="card-actions">
+            <button class="btn-sm ghost" onclick="loadUserFiles()">Actualizar</button>
+          </div>
+        </div>
+        <ul class="file-list" id="filesList">
+          <li style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">Cargando...</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PLAN -->
+    <div class="view" id="viewPlan">
+      <div class="plan-banner" id="planBannerPlan">
+        <div class="plan-info">
+          <div class="plan-name" id="planNamePlan">Cargando...</div>
+          <div class="plan-status" id="planStatusPlan">...</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Planes disponibles</span></div>
+        <div class="plan-grid" id="planGrid"><!-- rendered by JS --></div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.75rem;text-align:center;">Para cambiar de plan contacta al administrador: netorbewebhosting@gmail.com</p>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div class="view" id="viewAdmin">
+      <div class="stats-grid" id="adminStats">
+        <div class="stat-card"><div class="label">Total usuarios</div><div class="value" id="adminTotalUsers">—</div></div>
+        <div class="stat-card"><div class="label">Planes activos</div><div class="value" id="adminActivePlans">—</div></div>
+        <div class="stat-card"><div class="label">Almacenamiento total</div><div class="value" id="adminTotalStorage">—</div></div>
+        <div class="stat-card"><div class="label">Planes vencidos</div><div class="value" id="adminExpiredPlans" style="color:var(--red)">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Resumen de usuarios</span>
+          <button class="btn-sm ghost" onclick="loadAdminData()">Actualizar</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="adminUsersTable">
+            <thead><tr><th>Email</th><th>Plan</th><th>Estado</th><th>Almacenamiento</th><th>Vence</th><th>Acciones</th></tr></thead>
+            <tbody id="adminTableBody"><tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN USERS -->
+    <div class="view" id="viewAdminUsers">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Gestión de Usuarios</span>
+          <button class="btn-sm ghost" onclick="loadAdminUsers()">Actualizar</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>UID</th><th>Email</th><th>Plan</th><th>Vencimiento</th><th>Storage usado</th><th>Acciones</th></tr></thead>
+            <tbody id="adminUsersBody"><tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN PLANS CONFIG -->
+    <div class="view" id="viewAdminPlans">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Configuración de Planes</span></div>
+        <div class="plan-grid" id="adminPlanCards"><!-- rendered by JS --></div>
+      </div>
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-header"><span class="card-title">Estadísticas por Plan</span></div>
+        <div id="planStats" style="color:var(--text-muted);font-size:0.875rem;">Cargando...</div>
+      </div>
+    </div>
+
+  </div><!-- end page-content -->
+</div><!-- end main-area -->
+
+<!-- AUTH OVERLAY -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#2563eb,#06b6d4);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+        <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      NetOrbe Cloud
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Iniciar Sesión</div>
+      <div class="auth-tab" onclick="switchTab('register')">Registrarse</div>
+    </div>
+
+    <div class="auth-form active" id="formLogin">
+      <div class="form-group">
+        <label class="form-label">Correo electrónico</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="usuario@netorbe.lat" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" class="form-input" id="loginPass" placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter'&&!event.nativeEvent?.isComposing&&event.keyCode!==229)loginUser()">
+      </div>
+      <button class="btn-submit" onclick="loginUser()" id="loginBtn">Iniciar Sesión</button>
+      <div class="status-msg" id="loginStatus"></div>
+    </div>
+
+    <div class="auth-form" id="formRegister">
+      <div class="form-group">
+        <label class="form-label">Correo electrónico</label>
+        <input type="email" class="form-input" id="regEmail" placeholder="usuario@netorbe.lat" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" class="form-input" id="regPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar contraseña</label>
+        <input type="password" class="form-input" id="regPass2" placeholder="Repite tu contraseña" autocomplete="new-password"
+          onkeydown="if(event.key==='Enter'&&!event.nativeEvent?.isComposing&&event.keyCode!==229)registerUser()">
+      </div>
+      <button class="btn-submit" onclick="registerUser()" id="registerBtn">Crear cuenta</button>
+      <div class="status-msg" id="registerStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT USER (admin) -->
+<div class="modal-overlay" id="modalEditUser">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalEditUser')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-title">Editar Usuario</div>
+    <input type="hidden" id="editUserId">
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="text" class="form-input" id="editUserEmail" disabled>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Plan</label>
+      <select class="form-input" id="editUserPlan">
+        <option value="free">Gratuito</option>
+        <option value="pro">Pro</option>
+        <option value="business">Business</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha de vencimiento del plan</label>
+      <input type="date" class="form-input" id="editUserExpiry">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Límite de almacenamiento (MB)</label>
+      <input type="number" class="form-input" id="editUserStorage" placeholder="ej: 1024">
+    </div>
+    <button class="btn-submit" onclick="saveUserEdit()" id="saveEditBtn">Guardar cambios</button>
+    <div class="status-msg" id="editStatus"></div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ────────────────────────────────────────────────────────────────
+// CONFIG
+// ────────────────────────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBV7Y4MpYriQoJwIJ3h12H_V2OcYNO9yDs",
+  authDomain: "netorbegroup.firebaseapp.com",
+  databaseURL: "https://netorbegroup-default-rtdb.firebaseio.com",
+  projectId: "netorbegroup",
+  storageBucket: "netorbegroup.firebasestorage.app",
+  messagingSenderId: "105267221348",
+  appId: "1:105267221348:web:2b89cb2d17bda971306071"
+};
+
+const WORKER_URL = "https://upload.apis.netorbe.lat";
+const ADMIN_EMAIL = "netorbewebhosting@gmail.com";
+
+// Plan definitions (MB)
+const PLANS = {
+  free:     { name: "Gratuito",  storageMB: 1024,      maxFileMB: 50,    price: "$0/mes",  color: "#64748b" },
+  pro:      { name: "Pro",       storageMB: 51200,     maxFileMB: 2048,  price: "$5/mes",  color: "#2563eb" },
+  business: { name: "Business",  storageMB: 512000,    maxFileMB: 99999, price: "$20/mes", color: "#10b981" }
+};
+
+// ────────────────────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────────────────────
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db   = firebase.database();
+
+let currentUser   = null;
+let userKey       = "";
+let userPlanData  = { plan: "free", expiresAt: null, storageLimitMB: 1024 };
+let isAdmin       = false;
+let selectedFile  = null;
+let currentView   = "dashboard";
+
+// ────────────────────────────────────────────────────────────────
+// UTILS
+// ────────────────────────────────────────────────────────────────
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + " KB";
+  if (bytes < 1073741824) return (bytes/1048576).toFixed(1) + " MB";
+  return (bytes/1073741824).toFixed(2) + " GB";
+}
+function fmtMB(mb) { return mb >= 1024 ? (mb/1024).toFixed(0) + " GB" : mb + " MB"; }
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').substring(0,25);
+}
+
+function toast(msg, type = "info") {
+  const c = document.getElementById("toastContainer");
+  const t = document.createElement("div");
+  t.className = `toast ${type}`;
+  const icons = {
+    success: `<svg width="16" height="16" fill="none" stroke="#6ee7b7" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`,
+    error:   `<svg width="16" height="16" fill="none" stroke="#fca5a5" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    info:    `<svg width="16" height="16" fill="none" stroke="#93c5fd" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
+  };
+  t.innerHTML = (icons[type]||icons.info) + `<span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => { t.classList.add("removing"); setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+function showStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className = `status-msg ${type}`;
+}
+function clearStatus(id) { const el=document.getElementById(id); el.textContent=''; el.className='status-msg'; }
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+function openSidebar() { document.getElementById("sidebar").classList.add("open"); document.getElementById("sidebarOverlay").classList.add("open"); }
+function closeSidebar() { document.getElementById("sidebar").classList.remove("open"); document.getElementById("sidebarOverlay").classList.remove("open"); }
+
+// ────────────────────────────────────────────────────────────────
+// THEME
+// ────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute("data-theme") === "dark";
+  html.setAttribute("data-theme", isDark ? "light" : "dark");
+  document.getElementById("themeIconMoon").style.display = isDark ? "block" : "none";
+  document.getElementById("themeIconSun").style.display  = isDark ? "none"  : "block";
+  localStorage.setItem("theme", isDark ? "light" : "dark");
+}
+(function() {
+  const saved = localStorage.getItem("theme") || "dark";
+  document.documentElement.setAttribute("data-theme", saved);
+  if (saved === "light") {
+    document.getElementById("themeIconMoon").style.display = "none";
+    document.getElementById("themeIconSun").style.display  = "block";
+  }
+})();
+
+// ────────────────────────────────────────────────────────────────
+// AUTH TABS
+// ────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll(".auth-tab").forEach((t,i) => t.classList.toggle("active", (i===0&&tab==="login")||(i===1&&tab==="register")));
+  document.getElementById("formLogin").classList.toggle("active", tab === "login");
+  document.getElementById("formRegister").classList.toggle("active", tab === "register");
+}
+
+// Handle hash #register on load
+window.addEventListener("load", () => {
+  if (window.location.hash === "#register") switchTab("register");
+});
+
+// ────────────────────────────────────────────────────────────────
+// AUTH
+// ────────────────────────────────────────────────────────────────
+async function loginUser() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass  = document.getElementById("loginPass").value;
+  if (!email || !pass) return showStatus("loginStatus","Completa todos los campos.","error");
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true; btn.textContent = "Verificando...";
+  clearStatus("loginStatus");
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e) {
+    const msgs = { "auth/user-not-found":"Usuario no encontrado.", "auth/wrong-password":"Contraseña incorrecta.", "auth/invalid-email":"Correo inválido.", "auth/too-many-requests":"Demasiados intentos. Intenta más tarde." };
+    showStatus("loginStatus", msgs[e.code] || e.message, "error");
+    btn.disabled = false; btn.textContent = "Iniciar Sesión";
+  }
+}
+
+async function registerUser() {
+  const email = document.getElementById("regEmail").value.trim();
+  const pass  = document.getElementById("regPass").value;
+  const pass2 = document.getElementById("regPass2").value;
+  if (!email || !pass || !pass2) return showStatus("registerStatus","Completa todos los campos.","error");
+  if (pass !== pass2) return showStatus("registerStatus","Las contraseñas no coinciden.","error");
+  if (pass.length < 6) return showStatus("registerStatus","La contraseña debe tener al menos 6 caracteres.","error");
+  const btn = document.getElementById("registerBtn");
+  btn.disabled = true; btn.textContent = "Creando cuenta...";
+  clearStatus("registerStatus");
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    const key = await sha256(uid + email);
+    // Register key in worker
+    await fetch(`${WORKER_URL}/regs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "cipher-key": "REPLACE_WITH_CIPHER_KEY" },
+      body: JSON.stringify({ uid, email, sha256Key: key })
+    }).catch(()=>{});
+    // Init user profile in Firebase
+    await db.ref(`users/${uid}/profile`).set({
+      email, plan: "free", storageLimitMB: 1024, createdAt: new Date().toISOString(), expiresAt: null, storageUsedBytes: 0
+    });
+    toast("Cuenta creada. Bienvenido a NetOrbe Cloud.", "success");
+  } catch(e) {
+    const msgs = { "auth/email-already-in-use":"Este correo ya está registrado.", "auth/invalid-email":"Correo inválido.", "auth/weak-password":"Contraseña demasiado débil." };
+    showStatus("registerStatus", msgs[e.code] || e.message, "error");
+    btn.disabled = false; btn.textContent = "Crear cuenta";
+  }
+}
+
+function logout() {
+  auth.signOut();
+  toast("Sesión cerrada.", "info");
+}
+
+// ────────────────────────────────────────────────────────────────
+// AUTH STATE
+// ────────────────────────────────────────────────────────────────
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    userKey = await sha256(user.uid + user.email);
+    isAdmin = user.email === ADMIN_EMAIL;
+
+    document.getElementById("authOverlay").classList.add("hidden");
+    document.getElementById("sidebarEmail").textContent = user.email;
+    document.getElementById("userAvatarInitial").textContent = user.email[0].toUpperCase();
+
+    if (isAdmin) {
+      document.getElementById("adminSectionLabel").style.display = "block";
+      document.getElementById("adminNav").style.display = "block";
+    }
+
+    await loadUserPlan();
+    await loadDashboard();
+  } else {
+    currentUser = null; userKey = ""; isAdmin = false;
+    document.getElementById("authOverlay").classList.remove("hidden");
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// PLAN LOADING
+// ────────────────────────────────────────────────────────────────
+async function loadUserPlan() {
+  if (!currentUser) return;
+  try {
+    const snap = await db.ref(`users/${currentUser.uid}/profile`).once("value");
+    const data = snap.val() || {};
+    const planKey = data.plan || "free";
+    const planDef = PLANS[planKey] || PLANS.free;
+    userPlanData = {
+      plan: planKey,
+      expiresAt: data.expiresAt || null,
+      storageLimitMB: data.storageLimitMB || planDef.storageMB,
+      storageUsedBytes: data.storageUsedBytes || 0
+    };
+    // Check expiry
+    const now = new Date();
+    const expDate = userPlanData.expiresAt ? new Date(userPlanData.expiresAt) : null;
+    const isExpired = expDate && expDate < now;
+    const isWarning = expDate && !isExpired && (expDate - now) < 7 * 86400000;
+    const planName = planDef.name;
+    const expiryStr = expDate ? expDate.toLocaleDateString("es-ES") : "Sin vencimiento";
+
+    // Update sidebar badge
+    document.getElementById("sidebarPlanBadge").textContent = planName;
+
+    // Update plan banners
+    ["Dash","Plan"].forEach(suf => {
+      const b = document.getElementById(`planBanner${suf}`);
+      const n = document.getElementById(`planName${suf}`);
+      const s = document.getElementById(`planStatus${suf}`);
+      if (!b||!n||!s) return;
+      n.textContent = `Plan ${planName}`;
+      if (isExpired) {
+        b.className = "plan-banner expired";
+        s.className = "plan-status expired";
+        s.textContent = `Vencido el ${expiryStr} — Acceso a archivos bloqueado`;
+      } else if (isWarning) {
+        b.className = "plan-banner warning";
+        s.className = "plan-status warning";
+        s.textContent = `Por vencer el ${expiryStr} — Renueva pronto`;
+      } else {
+        b.className = "plan-banner";
+        s.className = "plan-status";
+        s.textContent = expDate ? `Activo hasta el ${expiryStr}` : "Plan activo";
+      }
+    });
+
+    // Block upload/files if expired
+    if (isExpired) {
+      blockSection("uploadCardWrap", "Tu plan ha vencido. Contacta al administrador para renovar.");
+      blockSection("filesCardWrap", "Tu plan ha vencido. Los archivos están bloqueados.");
+    } else {
+      unblockSection("uploadCardWrap");
+      unblockSection("filesCardWrap");
+    }
+
+    // Update dashboard stats
+    const usedMB = userPlanData.storageUsedBytes / (1024*1024);
+    const limitMB = userPlanData.storageLimitMB;
+    const pct = Math.min(100, (usedMB / limitMB) * 100).toFixed(1);
+
+    document.getElementById("dashPlanName").textContent = planName;
+    document.getElementById("dashPlanExpiry").textContent = expDate ? `Vence: ${expiryStr}` : "Sin vencimiento";
+    document.getElementById("dashStorageUsed").textContent = fmtMB(Math.round(usedMB));
+    document.getElementById("dashStorageLimit").textContent = `de ${fmtMB(limitMB)} disponible`;
+    document.getElementById("dashStoragePct").textContent = `${pct}% usado`;
+    document.getElementById("storageBarUsed").textContent = fmtMB(Math.round(usedMB)) + " usado";
+    document.getElementById("storageBarTotal").textContent = fmtMB(limitMB) + " total";
+    const fill = document.getElementById("storageBarFill");
+    fill.style.width = pct + "%";
+    fill.className = "storage-bar-fill" + (parseFloat(pct) > 80 ? " warning" : "");
+    document.getElementById("uploadStorageInfo").textContent = `${fmtMB(Math.round(usedMB))} de ${fmtMB(limitMB)} usado`;
+
+    // Max file size hint
+    const maxMB = PLANS[planKey]?.maxFileMB || 50;
+    document.getElementById("dzLimit").textContent = `Tamaño máximo por archivo: ${fmtMB(maxMB)}`;
+
+  } catch(e) { console.error("[v0] loadUserPlan error:", e); }
+}
+
+function blockSection(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.querySelector(".blocked-overlay")) return;
+  const ov = document.createElement("div");
+  ov.className = "blocked-overlay";
+  ov.innerHTML = `<svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><p>${msg}</p><button class="btn-sm ghost" onclick="goTo('plan')">Ver planes</button>`;
+  el.appendChild(ov);
+}
+function unblockSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const ov = el.querySelector(".blocked-overlay");
+  if (ov) ov.remove();
+}
+
+// ────────────────────────────────────────────────────────────────
+// NAVIGATION
+// ────────────────────────────────────────────────────────────────
+const TITLES = {
+  dashboard:"Panel", upload:"Subir Archivo", files:"Mis Archivos",
+  plan:"Mi Plan", admin:"Dashboard Admin", "admin-users":"Gestión de Usuarios", "admin-plans":"Planes & Config"
+};
+const VIEW_MAP = {
+  dashboard:"viewDashboard", upload:"viewUpload", files:"viewFiles",
+  plan:"viewPlan", admin:"viewAdmin", "admin-users":"viewAdminUsers", "admin-plans":"viewAdminPlans"
+};
+const ADMIN_VIEWS = ["admin","admin-users","admin-plans"];
+
+function goTo(view) {
+  if (ADMIN_VIEWS.includes(view) && !isAdmin) { toast("Acceso denegado.", "error"); return; }
+  currentView = view;
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+  const viewEl = document.getElementById(VIEW_MAP[view]);
+  if (viewEl) viewEl.classList.add("active");
+  document.getElementById("topbarTitle").textContent = TITLES[view] || view;
+  document.querySelectorAll(".nav-link").forEach(l => { if (l.textContent.trim().startsWith(TITLES[view]||view)) l.classList.add("active"); });
+  closeSidebar();
+
+  if (view === "files")        loadUserFiles();
+  if (view === "dashboard")    loadDashboard();
+  if (view === "plan")         renderPlanGrid();
+  if (view === "admin")        loadAdminData();
+  if (view === "admin-users")  loadAdminUsers();
+  if (view === "admin-plans")  renderAdminPlans();
+}
+
+// ────────────────────────────────────────────────────────────────
+// DASHBOARD
+// ────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  if (!currentUser) return;
+  try {
+    const res = await fetch(`${WORKER_URL}/users/${currentUser.uid}/upfiles`, { headers: { "x-netorbe-authkey": userKey } });
+    const data = await res.json();
+    const files = data.files || [];
+    document.getElementById("dashFileCount").textContent = files.length;
+    const recent = files.slice(-3).reverse();
+    const list = document.getElementById("recentFilesList");
+    if (!recent.length) { list.innerHTML = `<li style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">No hay archivos aún.</li>`; return; }
+    list.innerHTML = recent.map(f => fileItemHTML(f, true)).join('');
+  } catch(e) { console.error("[v0] loadDashboard:", e); }
+}
+
+// ────────────────────────────────────────────────────────────────
+// FILE LIST
+// ────────────────────────────────────────────────────────────────
+function fileItemHTML(file, compact = false) {
+  const ext = (file.extension||"???").toUpperCase().substring(0,4);
+  const size = fmtSize(file.size || 0);
+  const date = file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString("es-ES") : "—";
+  const url = `https://usc.stgnetorbe.lat/${file.path}`;
+  return `<li class="file-item">
+    <div class="file-icon">${ext}</div>
+    <div class="file-details">
+      <div class="file-name" title="${file.name}">${file.name}</div>
+      <div class="file-meta">${size} &middot; ${date}</div>
+    </div>
+    <div class="file-actions">
+      <a href="${url}" target="_blank" rel="noopener" class="btn-sm ghost">Ver</a>
+      ${!compact ? `<button class="btn-sm danger" onclick="deleteFile('${file.path}','${file.name}')">Eliminar</button>` : ''}
+    </div>
+  </li>`;
+}
+
+async function loadUserFiles() {
+  const list = document.getElementById("filesList");
+  list.innerHTML = `<li style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">Cargando archivos...</li>`;
+  try {
+    const res = await fetch(`${WORKER_URL}/users/${currentUser.uid}/upfiles`, { headers: { "x-netorbe-authkey": userKey } });
+    const data = await res.json();
+    const files = data.files || [];
+    if (!files.length) { list.innerHTML = `<li style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">No hay archivos subidos.</li>`; return; }
+    list.innerHTML = files.reverse().map(f => fileItemHTML(f)).join('');
+  } catch(e) {
+    list.innerHTML = `<li style="padding:2rem;text-align:center;color:#fca5a5;font-size:0.875rem;">Error al cargar archivos.</li>`;
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// UPLOAD
+// ────────────────────────────────────────────────────────────────
+const dropZone = document.getElementById("dropZone");
+const fileInput = document.getElementById("fileInput");
+
+dropZone.addEventListener("click", () => fileInput.click());
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault(); dropZone.classList.remove("drag-over");
+  if (e.dataTransfer.files.length) setSelectedFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", e => { if (e.target.files[0]) setSelectedFile(e.target.files[0]); });
+
+function setSelectedFile(file) {
+  const maxMB = PLANS[userPlanData.plan]?.maxFileMB || 50;
+  if (file.size > maxMB * 1024 * 1024) {
+    toast(`Archivo demasiado grande. Máximo ${fmtMB(maxMB)} para tu plan.`, "error");
+    return;
+  }
+  selectedFile = file;
+  document.getElementById("dzTitle").textContent = `Archivo: ${file.name}`;
+  clearStatus("uploadStatus");
+}
+
+async function uploadFile() {
+  if (!selectedFile) { toast("Selecciona un archivo primero.", "error"); return; }
+
+  // Check plan expiry
+  const expDate = userPlanData.expiresAt ? new Date(userPlanData.expiresAt) : null;
+  if (expDate && expDate < new Date()) { toast("Tu plan ha vencido. Contacta al administrador.", "error"); return; }
+
+  // Check storage limit
+  const usedBytes = userPlanData.storageUsedBytes || 0;
+  const limitBytes = (userPlanData.storageLimitMB || 1024) * 1024 * 1024;  // Convert to bytes: limitMB * 1MB
+  if (usedBytes + selectedFile.size > limitBytes) {
+    toast("Límite de almacenamiento alcanzado. Actualiza tu plan.", "error"); return;
+  }
+
+  const btn = document.getElementById("uploadBtn");
+  btn.disabled = true; btn.textContent = "Subiendo...";
+  const progress = document.getElementById("uploadProgress");
+  progress.style.display = "block";
+  document.getElementById("progressFill").style.width = "10%";
+  document.getElementById("progressLabel").textContent = "Preparando subida...";
+  clearStatus("uploadStatus");
+
+  try {
+    const filePath = `usr/${currentUser.uid}/${selectedFile.name}`;
+    document.getElementById("progressFill").style.width = "40%";
+    document.getElementById("progressLabel").textContent = "Enviando archivo...";
+
+    const res = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: {
+        "x-netorbe-authkey": userKey,
+        "x-netorbe-fp": filePath,
+        "x-netorbe-userid-auth": currentUser.uid,
+        "x-netorbe-filename": selectedFile.name,
+        "x-netorbe-timestamp": Date.now().toString(),
+        "Content-Type": selectedFile.type || "application/octet-stream"
+      },
+      body: selectedFile
+    });
+
+    document.getElementById("progressFill").style.width = "85%";
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      document.getElementById("progressFill").style.width = "100%";
+      document.getElementById("progressLabel").textContent = "¡Subido con éxito!";
+
+      // Update storage usage in Firebase
+      const newUsed = (userPlanData.storageUsedBytes || 0) + selectedFile.size;
+      await db.ref(`users/${currentUser.uid}/profile/storageUsedBytes`).set(newUsed);
+      userPlanData.storageUsedBytes = newUsed;
+
+      toast(`${selectedFile.name} subido correctamente.`, "success");
+      selectedFile = null;
+      fileInput.value = "";
+      document.getElementById("dzTitle").textContent = "Arrastra tu archivo aquí";
+      await loadUserPlan();
+      setTimeout(() => { progress.style.display = "none"; document.getElementById("progressFill").style.width = "0%"; }, 1500);
+    } else {
+      throw new Error(data.message || "Error al subir el archivo.");
+    }
+  } catch(e) {
+    showStatus("uploadStatus", e.message, "error");
+    progress.style.display = "none";
+  } finally {
+    btn.disabled = false; btn.textContent = "Subir a NetOrbe Cloud";
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// DELETE FILE
+// ────────────────────────────────────────────────────────────────
+async function deleteFile(filePath, fileName) {
+  if (!confirm(`¿Eliminar "${fileName}"? Esta acción no se puede deshacer.`)) return;
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: "DELETE",
+      headers: { "x-netorbe-authkey": userKey, "x-netorbe-fp": filePath, "x-netorbe-userid-auth": currentUser.uid }
+    });
+    if (res.ok) {
+      toast(`${fileName} eliminado.`, "success");
+      loadUserFiles();
+      loadDashboard();
+    } else {
+      toast("No se pudo eliminar el archivo.", "error");
+    }
+  } catch(e) { toast("Error de conexión.", "error"); }
+}
+
+// ────────────────────────────────────────────────────────────────
+// PLAN GRID
+// ────────────────────────────────────────────────────────────────
+function renderPlanGrid() {
+  const grid = document.getElementById("planGrid");
+  grid.innerHTML = Object.entries(PLANS).map(([key, plan]) => {
+    const isCurrent = key === userPlanData.plan;
+    return `<div class="plan-card ${isCurrent ? 'current' : ''}">
+      ${isCurrent ? '<div class="plan-card-badge">ACTUAL</div>' : ''}
+      <h3>${plan.name}</h3>
+      <div class="price">${plan.price.split("/")[0]}<span>/mes</span></div>
+      <div class="plan-storage">${fmtMB(plan.storageMB)} de almacenamiento</div>
+      <ul>
+        <li><span class="ck">&#10003;</span> Archivos hasta ${fmtMB(plan.maxFileMB)}</li>
+        <li><span class="ck">&#10003;</span> ${fmtMB(plan.storageMB)} storage</li>
+        ${key !== 'free' ? '<li><span class="ck">&#10003;</span> Soporte prioritario</li>' : ''}
+        ${key === 'business' ? '<li><span class="ck">&#10003;</span> Compartir archivos</li>' : ''}
+      </ul>
+    </div>`;
+  }).join('');
+}
+
+// ────────────────────────────────────────────────────────────────
+// ADMIN — LOAD DATA
+// ────────────────────────────────────────────────────────────────
+async function loadAdminData() {
+  if (!isAdmin) return;
+  try {
+    const snap = await db.ref("users").once("value");
+    const users = snap.val() || {};
+    const uids = Object.keys(users);
+    const profiles = uids.map(uid => ({ uid, ...(users[uid].profile||{}) }));
+
+    const total = profiles.length;
+    const active = profiles.filter(u => { const e=u.expiresAt?new Date(u.expiresAt):null; return !e||e>=new Date(); }).length;
+    const expired = total - active;
+    const totalBytes = profiles.reduce((s,u) => s + (u.storageUsedBytes||0), 0);
+
+    document.getElementById("adminTotalUsers").textContent = total;
+    document.getElementById("adminActivePlans").textContent = active;
+    document.getElementById("adminExpiredPlans").textContent = expired;
+    document.getElementById("adminTotalStorage").textContent = fmtSize(totalBytes);
+
+    const tbody = document.getElementById("adminTableBody");
+    if (!profiles.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Sin usuarios.</td></tr>`; return; }
+
+    tbody.innerHTML = profiles.map(u => {
+      const now = new Date();
+      const expDate = u.expiresAt ? new Date(u.expiresAt) : null;
+      const isExp = expDate && expDate < now;
+      const isWarn = expDate && !isExp && (expDate-now) < 7*86400000;
+      const planKey = u.plan || "free";
+      const planName = PLANS[planKey]?.name || "Gratuito";
+      const used = fmtSize(u.storageUsedBytes||0);
+      const limitMB = u.storageLimitMB || PLANS[planKey]?.storageMB || 1024;
+      const statusDot = isExp ? "expired" : isWarn ? "warning" : "active";
+      const statusText = isExp ? "Vencido" : isWarn ? "Por vencer" : "Activo";
+      return `<tr>
+        <td><strong>${u.email||"—"}</strong></td>
+        <td><span class="plan-tag ${isExp?'expired':planKey}">${planName}</span></td>
+        <td><span class="status-dot ${statusDot}"></span>${statusText}</td>
+        <td>${used} / ${fmtMB(limitMB)}</td>
+        <td>${expDate ? expDate.toLocaleDateString("es-ES") : "Sin vencimiento"}</td>
+        <td><button class="btn-sm ghost" onclick="openEditUser('${u.uid}','${u.email}','${planKey}','${u.expiresAt||''}',${limitMB})">Editar</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.error("[v0] loadAdminData:", e); toast("Error al cargar datos admin.", "error"); }
+}
+
+async function loadAdminUsers() {
+  if (!isAdmin) return;
+  await loadAdminData();
+  const snap = await db.ref("users").once("value");
+  const users = snap.val() || {};
+  const profiles = Object.entries(users).map(([uid,data]) => ({ uid, ...(data.profile||{}) }));
+  const tbody = document.getElementById("adminUsersBody");
+  if (!profiles.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Sin usuarios.</td></tr>`; return; }
+  tbody.innerHTML = profiles.map(u => {
+    const planKey = u.plan||"free";
+    const planDef = PLANS[planKey] || PLANS.free;
+    const expDate = u.expiresAt ? new Date(u.expiresAt).toLocaleDateString("es-ES") : "—";
+    const used = fmtSize(u.storageUsedBytes||0);
+    const limitMB = u.storageLimitMB || planDef.storageMB;
+    return `<tr>
+      <td><code style="font-size:0.75rem;color:var(--text-faint)">${u.uid.substring(0,12)}...</code></td>
+      <td><strong>${u.email||"—"}</strong></td>
+      <td><span class="plan-tag ${planKey}">${planDef.name}</span></td>
+      <td>${expDate}</td>
+      <td>${used} / ${fmtMB(limitMB)}</td>
+      <td><button class="btn-sm ghost" onclick="openEditUser('${u.uid}','${u.email}','${planKey}','${u.expiresAt||''}',${limitMB})">Editar</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openEditUser(uid, email, plan, expiresAt, storageLimitMB) {
+  document.getElementById("editUserId").value = uid;
+  document.getElementById("editUserEmail").value = email;
+  document.getElementById("editUserPlan").value = plan;
+  document.getElementById("editUserExpiry").value = expiresAt ? expiresAt.split("T")[0] : "";
+  document.getElementById("editUserStorage").value = storageLimitMB;
+  clearStatus("editStatus");
+  openModal("modalEditUser");
+}
+
+async function saveUserEdit() {
+  if (!isAdmin) { toast("Acceso denegado.", "error"); return; }
+  const uid = document.getElementById("editUserId").value;
+  const plan = document.getElementById("editUserPlan").value;
+  const expiryVal = document.getElementById("editUserExpiry").value;
+  const storageMB = parseInt(document.getElementById("editUserStorage").value) || PLANS[plan]?.storageMB || 1024;
+  const expiresAt = expiryVal ? new Date(expiryVal).toISOString() : null;
+  const btn = document.getElementById("saveEditBtn");
+  btn.disabled = true; btn.textContent = "Guardando...";
+  try {
+    await db.ref(`users/${uid}/profile`).update({ plan, expiresAt, storageLimitMB: storageMB });
+    toast("Usuario actualizado correctamente.", "success");
+    closeModal("modalEditUser");
+    loadAdminData();
+    if (currentView === "admin-users") loadAdminUsers();
+  } catch(e) {
+    showStatus("editStatus", "Error al guardar: " + e.message, "error");
+  } finally {
+    btn.disabled = false; btn.textContent = "Guardar cambios";
+  }
+}
+
+function renderAdminPlans() {
+  const grid = document.getElementById("adminPlanCards");
+  grid.innerHTML = Object.entries(PLANS).map(([key, plan]) => `
+    <div class="plan-card">
+      <h3>${plan.name}</h3>
+      <div class="price">${plan.price.split("/")[0]}<span>/mes</span></div>
+      <div class="plan-storage">Almacenamiento: ${fmtMB(plan.storageMB)}</div>
+      <ul>
+        <li><span class="ck">&#10003;</span> Archivos hasta ${fmtMB(plan.maxFileMB)}</li>
+        <li><span class="ck">&#10003;</span> Identificador: <code>${key}</code></li>
+      </ul>
+    </div>
+  `).join('');
+
+  // Plan stats
+  db.ref("users").once("value").then(snap => {
+    const users = snap.val() || {};
+    const counts = { free: 0, pro: 0, business: 0 };
+    Object.values(users).forEach(u => { const p = u.profile?.plan || "free"; if (counts[p] !== undefined) counts[p]++; });
+    document.getElementById("planStats").innerHTML = `
+      <div class="stats-grid" style="margin:0">
+        ${Object.entries(counts).map(([k,v]) => `<div class="stat-card"><div class="label">${PLANS[k]?.name||k}</div><div class="value">${v}</div><div class="sub">usuarios</div></div>`).join('')}
+      </div>`;
+  });
+}
+
+// ────────────────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────────────────
+window.addEventListener("load", () => {
+  if (window.location.hash === "#register") switchTab("register");
+});
+</script>
+</body>
+</html>

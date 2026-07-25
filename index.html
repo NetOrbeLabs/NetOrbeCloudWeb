@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetOrbe Cloud — Almacenamiento Seguro en la Nube</title>
+  <meta name="description" content="NetOrbe Cloud ofrece almacenamiento en la nube seguro, rápido y confiable con infraestructura de clase mundial.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #2563eb;
+      --blue-light: #3b82f6;
+      --blue-glow: rgba(37,99,235,0.35);
+      --dark: #05080f;
+      --dark-2: #0a0e1a;
+      --dark-3: #0f1420;
+      --dark-4: #141924;
+      --surface: #111827;
+      --surface-2: #1a2235;
+      --border: rgba(255,255,255,0.07);
+      --border-light: rgba(255,255,255,0.12);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-faint: #4b5563;
+      --accent: #06b6d4;
+      --green: #10b981;
+      --radius: 12px;
+      --radius-lg: 20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--dark);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark-2); }
+    ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 3px; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(1.5rem, 5vw, 5rem);
+      height: 70px;
+      background: rgba(5, 8, 15, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 800; font-size: 1.2rem; letter-spacing: -0.02em;
+    }
+    .nav-logo .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--blue), var(--accent));
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo span b { color: var(--blue-light); }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.9rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border-light);
+      color: var(--text); padding: 0.5rem 1.2rem; border-radius: var(--radius);
+      font-size: 0.9rem; font-weight: 500; cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .btn-ghost:hover { background: var(--surface); border-color: var(--blue); }
+
+    .btn-primary {
+      background: var(--blue); border: none;
+      color: #fff; padding: 0.55rem 1.4rem; border-radius: var(--radius);
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+      box-shadow: 0 0 20px var(--blue-glow);
+    }
+    .btn-primary:hover { background: var(--blue-light); transform: translateY(-1px); box-shadow: 0 0 30px var(--blue-glow); }
+
+    .hamburger { display: none; background: none; border: none; cursor: pointer; color: var(--text); padding: 6px; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px clamp(1.5rem, 5vw, 4rem) 80px;
+      position: relative; overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .hero-bg::before {
+      content: '';
+      position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 700px;
+      background: radial-gradient(ellipse at center, rgba(37,99,235,0.18) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute; bottom: -100px; right: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(ellipse at center, rgba(6,182,212,0.08) 0%, transparent 65%);
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(37,99,235,0.12); border: 1px solid rgba(37,99,235,0.3);
+      color: var(--blue-light); padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em;
+      text-transform: uppercase; margin-bottom: 2rem;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; background: var(--blue-light); border-radius: 50%; animation: pulse 2s infinite; }
+
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+
+    h1 {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 900; line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+    }
+    h1 .highlight {
+      background: linear-gradient(90deg, var(--blue-light), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--text-muted); max-width: 600px; line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-cta {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 4rem;
+    }
+
+    .btn-large {
+      padding: 0.85rem 2.2rem; font-size: 1rem; font-weight: 700;
+      border-radius: var(--radius); border: none; cursor: pointer;
+      text-decoration: none; transition: all 0.25s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-large.primary {
+      background: var(--blue); color: #fff;
+      box-shadow: 0 0 30px var(--blue-glow);
+    }
+    .btn-large.primary:hover { background: var(--blue-light); transform: translateY(-2px); box-shadow: 0 0 50px var(--blue-glow); }
+    .btn-large.secondary {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border-light);
+    }
+    .btn-large.secondary:hover { background: var(--surface-2); border-color: var(--blue); }
+
+    .hero-stats {
+      display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
+    }
+    .stat { text-align: center; }
+    .stat-number { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text); }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── SECTION ── */
+    section { padding: 100px clamp(1.5rem, 5vw, 5rem); }
+
+    .section-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--blue-light);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; letter-spacing: -0.03em;
+      line-height: 1.1; margin-bottom: 1rem;
+    }
+    .section-sub {
+      font-size: 1.05rem; color: var(--text-muted);
+      max-width: 550px; line-height: 1.7;
+    }
+
+    /* ── FEATURES ── */
+    .features-section { background: var(--dark-2); }
+    .features-header { text-align: center; margin-bottom: 4rem; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px; margin: 0 auto;
+    }
+
+    .feature-card {
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--blue), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(37,99,235,0.4); transform: translateY(-4px); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: rgba(37,99,235,0.12); border: 1px solid rgba(37,99,235,0.2);
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.25rem; color: var(--blue-light);
+    }
+    .feature-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem; }
+    .feature-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── PRICING ── */
+    .pricing-section { background: var(--dark); }
+    .pricing-header { text-align: center; margin-bottom: 4rem; }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1050px; margin: 0 auto;
+      align-items: stretch;
+    }
+
+    .pricing-card {
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      display: flex; flex-direction: column;
+      transition: all 0.3s; position: relative;
+    }
+    .pricing-card.popular {
+      background: var(--dark-4);
+      border-color: var(--blue);
+      box-shadow: 0 0 40px rgba(37,99,235,0.2);
+    }
+
+    .popular-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--blue); color: #fff;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 5px 16px; border-radius: 999px;
+    }
+
+    .plan-name {
+      font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem;
+    }
+    .plan-price {
+      display: flex; align-items: baseline; gap: 4px; margin-bottom: 0.4rem;
+    }
+    .plan-price .amount {
+      font-size: 3rem; font-weight: 900; letter-spacing: -0.04em;
+    }
+    .plan-price .period { font-size: 0.9rem; color: var(--text-muted); }
+    .plan-desc { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.5; }
+
+    .plan-features { list-style: none; flex-grow: 1; margin-bottom: 2rem; }
+    .plan-features li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.9rem; padding: 0.45rem 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .plan-features li:last-child { border-bottom: none; }
+    .plan-features li .check { color: var(--green); flex-shrink: 0; }
+    .plan-features li .x-mark { color: var(--text-faint); flex-shrink: 0; }
+    .plan-features li.active { color: var(--text); }
+
+    .btn-plan {
+      width: 100%; padding: 0.85rem; border-radius: var(--radius);
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      text-decoration: none; text-align: center;
+      display: block; transition: all 0.2s;
+    }
+    .btn-plan.outline {
+      background: transparent; border: 1px solid var(--border-light); color: var(--text);
+    }
+    .btn-plan.outline:hover { background: var(--surface); border-color: var(--blue); }
+    .btn-plan.fill {
+      background: var(--blue); border: none; color: #fff;
+      box-shadow: 0 0 25px var(--blue-glow);
+    }
+    .btn-plan.fill:hover { background: var(--blue-light); box-shadow: 0 0 40px var(--blue-glow); }
+
+    /* ── HOW IT WORKS ── */
+    .how-section { background: var(--dark-2); }
+    .how-header { text-align: center; margin-bottom: 5rem; }
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem; max-width: 960px; margin: 0 auto; position: relative;
+    }
+    .step { text-align: center; }
+    .step-number {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 800; color: var(--blue-light);
+      margin: 0 auto 1.25rem;
+    }
+    .step h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .step p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── SECURITY ── */
+    .security-section {
+      background: var(--dark);
+      display: flex; align-items: center; gap: 5rem;
+      flex-wrap: wrap;
+    }
+    .security-content { flex: 1; min-width: 280px; }
+    .security-grid { flex: 1; min-width: 280px; }
+    .security-items {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    .security-item {
+      background: var(--dark-3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .security-item .icon { color: var(--blue-light); }
+    .security-item h4 { font-size: 0.9rem; font-weight: 700; }
+    .security-item p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: var(--dark-2);
+      text-align: center;
+      padding: 120px clamp(1.5rem, 5vw, 5rem);
+    }
+    .cta-section h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900; letter-spacing: -0.03em;
+      margin-bottom: 1rem; line-height: 1.1;
+    }
+    .cta-section p {
+      font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2.5rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      border-top: 1px solid var(--border);
+      padding: 3rem clamp(1.5rem, 5vw, 5rem);
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1.5rem;
+    }
+    .footer-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; }
+    .footer-links { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--text-faint); font-size: 0.82rem; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+      .nav-links.open {
+        display: flex; flex-direction: column;
+        position: fixed; top: 70px; left: 0; right: 0;
+        background: var(--dark-2); border-bottom: 1px solid var(--border);
+        padding: 1.5rem 2rem; gap: 1.2rem; z-index: 99;
+      }
+      .security-section { flex-direction: column; }
+      .security-items { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <div class="logo-icon">
+        <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      NetOrbe <b>&nbsp;Cloud</b>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#features">Funciones</a></li>
+      <li><a href="#pricing">Precios</a></li>
+      <li><a href="#how">Cómo funciona</a></li>
+      <li><a href="#security">Seguridad</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="/dashboard/" class="btn-ghost">Iniciar Sesión</a>
+      <a href="/dashboard/#register" class="btn-primary">Comenzar gratis</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menú">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Infraestructura de clase mundial
+    </div>
+    <h1>Almacenamiento en la nube<br><span class="highlight">sin compromisos</span></h1>
+    <p class="hero-sub">NetOrbe Cloud te ofrece almacenamiento rápido, seguro y confiable. Sube, gestiona y comparte tus archivos desde cualquier lugar del mundo.</p>
+    <div class="hero-cta">
+      <a href="app.html#register" class="btn-large primary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Empezar ahora — Es gratis
+      </a>
+      <a href="#pricing" class="btn-large secondary">Ver planes</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-number">99.9%</div><div class="stat-label">Disponibilidad</div></div>
+      <div class="stat"><div class="stat-number">256-bit</div><div class="stat-label">Cifrado AES</div></div>
+      <div class="stat"><div class="stat-number">R2</div><div class="stat-label">Cloudflare Storage</div></div>
+      <div class="stat"><div class="stat-number">0</div><div class="stat-label">Fugas de datos</div></div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-section" id="features">
+    <div class="features-header">
+      <div class="section-badge">
+        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Funcionalidades
+      </div>
+      <h2 class="section-title">Todo lo que necesitas.<br>Nada que no.</h2>
+      <p class="section-sub">Construido sobre la infraestructura de Cloudflare R2 para máximo rendimiento y seguridad.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="feature-title">Cifrado extremo a extremo</div>
+        <div class="feature-desc">Todos tus archivos se cifran con AES-256 antes de almacenarse. Solo tú tienes acceso a tus datos.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="13 2 13 9 20 9"/><path d="M20 9 13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/></svg>
+        </div>
+        <div class="feature-title">Gestión de archivos</div>
+        <div class="feature-desc">Sube, organiza y elimina archivos fácilmente desde tu panel personal con vista clara de todo tu contenido.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="feature-title">Disponibilidad 24/7</div>
+        <div class="feature-desc">Infraestructura distribuida en la red global de Cloudflare. Accede a tus archivos en cualquier momento.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="feature-title">Control de acceso</div>
+        <div class="feature-desc">Sistema de roles con administrador y usuarios. Cada usuario solo puede ver y gestionar sus propios archivos.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="feature-title">Panel de administración</div>
+        <div class="feature-desc">Los administradores tienen acceso a métricas completas, gestión de usuarios, planes y almacenamiento global.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="feature-title">Límites por plan</div>
+        <div class="feature-desc">Sistema de planes con límites de almacenamiento reales. Cuando el plan vence, el acceso se bloquea automáticamente.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing-section" id="pricing">
+    <div class="pricing-header">
+      <div class="section-badge">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Precios
+      </div>
+      <h2 class="section-title">Planes para cada necesidad</h2>
+      <p class="section-sub">Elige el plan que mejor se adapte a ti. Sin tarifas ocultas, sin sorpresas.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- FREE -->
+      <div class="pricing-card">
+        <div class="plan-name">Gratuito</div>
+        <div class="plan-price">
+          <span class="amount">$0</span>
+          <span class="period">/ mes</span>
+        </div>
+        <div class="plan-desc">Para comenzar a explorar NetOrbe Cloud sin ningún costo.</div>
+        <ul class="plan-features">
+          <li class="active"><span class="check">&#10003;</span> 1 GB de almacenamiento</li>
+          <li class="active"><span class="check">&#10003;</span> Archivos hasta 50 MB</li>
+          <li class="active"><span class="check">&#10003;</span> Panel de archivos</li>
+          <li class="active"><span class="check">&#10003;</span> Cifrado básico</li>
+          <li><span class="x-mark">&#10007;</span> Soporte prioritario</li>
+          <li><span class="x-mark">&#10007;</span> Historial de versiones</li>
+          <li><span class="x-mark">&#10007;</span> Compartir archivos</li>
+        </ul>
+        <a href="app.html#register" class="btn-plan outline">Comenzar gratis</a>
+      </div>
+
+      <!-- PRO -->
+      <div class="pricing-card popular">
+        <div class="popular-badge">MAS POPULAR</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">
+          <span class="amount">$5</span>
+          <span class="period">/ mes</span>
+        </div>
+        <div class="plan-desc">Para profesionales y creadores de contenido que necesitan más espacio.</div>
+        <ul class="plan-features">
+          <li class="active"><span class="check">&#10003;</span> 50 GB de almacenamiento</li>
+          <li class="active"><span class="check">&#10003;</span> Archivos hasta 2 GB</li>
+          <li class="active"><span class="check">&#10003;</span> Panel de archivos avanzado</li>
+          <li class="active"><span class="check">&#10003;</span> Cifrado AES-256</li>
+          <li class="active"><span class="check">&#10003;</span> Soporte prioritario</li>
+          <li class="active"><span class="check">&#10003;</span> Historial de versiones</li>
+          <li><span class="x-mark">&#10007;</span> Compartir archivos</li>
+        </ul>
+        <a href="app.html#register" class="btn-plan fill">Obtener Pro</a>
+      </div>
+
+      <!-- BUSINESS -->
+      <div class="pricing-card">
+        <div class="plan-name">Business</div>
+        <div class="plan-price">
+          <span class="amount">$20</span>
+          <span class="period">/ mes</span>
+        </div>
+        <div class="plan-desc">Para equipos y empresas con almacenamiento masivo y todas las funciones.</div>
+        <ul class="plan-features">
+          <li class="active"><span class="check">&#10003;</span> 500 GB de almacenamiento</li>
+          <li class="active"><span class="check">&#10003;</span> Archivos sin límite de tamaño</li>
+          <li class="active"><span class="check">&#10003;</span> Panel de archivos avanzado</li>
+          <li class="active"><span class="check">&#10003;</span> Cifrado AES-256</li>
+          <li class="active"><span class="check">&#10003;</span> Soporte prioritario 24/7</li>
+          <li class="active"><span class="check">&#10003;</span> Historial de versiones</li>
+          <li class="active"><span class="check">&#10003;</span> Compartir archivos</li>
+        </ul>
+        <a href="app.html#register" class="btn-plan outline">Obtener Business</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="how">
+    <div class="how-header">
+      <div class="section-badge">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Proceso
+      </div>
+      <h2 class="section-title">Listo en menos de un minuto</h2>
+      <p class="section-sub">Sin complicaciones, sin configuraciones técnicas. Solo sube y listo.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Crea tu cuenta</h3>
+        <p>Regístrate con tu correo electrónico. Recibirás acceso inmediato a tu panel personal.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Elige tu plan</h3>
+        <p>Selecciona el plan que mejor se adapta a tus necesidades. Puedes cambiar en cualquier momento.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Sube tus archivos</h3>
+        <p>Arrastra y suelta o selecciona tus archivos. La subida es segura y rápida.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">4</div>
+        <h3>Accede desde cualquier lugar</h3>
+        <p>Tus archivos están disponibles 24/7 desde cualquier dispositivo con conexión a internet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITY -->
+  <section class="security-section" id="security">
+    <div class="security-content">
+      <div class="section-badge">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Seguridad
+      </div>
+      <h2 class="section-title">Seguridad que no se negocia</h2>
+      <p class="section-sub">Cada aspecto de NetOrbe Cloud fue diseñado con la seguridad como prioridad absoluta.</p>
+      <br><br>
+      <a href="app.html#register" class="btn-large primary" style="display:inline-flex;">Comenzar seguro</a>
+    </div>
+    <div class="security-grid">
+      <div class="security-items">
+        <div class="security-item">
+          <div class="icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <h4>AES-256</h4>
+          <p>Cifrado militar para todos tus archivos en reposo y en tránsito.</p>
+        </div>
+        <div class="security-item">
+          <div class="icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <h4>Autenticación segura</h4>
+          <p>Firebase Auth con tokens SHA-256 únicos por usuario.</p>
+        </div>
+        <div class="security-item">
+          <div class="icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <h4>Aislamiento de usuarios</h4>
+          <p>Cada usuario solo accede a sus propios archivos. Cero fugas entre cuentas.</p>
+        </div>
+        <div class="security-item">
+          <div class="icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <h4>Auditoría en tiempo real</h4>
+          <p>Registro completo de todas las operaciones en Firebase Realtime DB.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Comienza hoy.<br><span style="color:var(--blue-light)">Es completamente gratis.</span></h2>
+    <p>Sin tarjeta de crédito. Sin configuraciones complicadas. Solo registrate y sube.</p>
+    <a href="app.html#register" class="btn-large primary">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Crear cuenta gratis
+    </a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <div style="width:28px;height:28px;background:linear-gradient(135deg,#2563eb,#06b6d4);border-radius:7px;display:flex;align-items:center;justify-content:center;">
+          <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        NetOrbe Cloud
+      </div>
+      <div class="footer-links">
+        <a href="#features">Funciones</a>
+        <a href="#pricing">Precios</a>
+        <a href="#security">Seguridad</a>
+        <a href="app.html">Acceder</a>
+      </div>
+      <div class="footer-copy">© 2025 NetOrbe Cloud. Todos los derechos reservados.</div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleNav() {
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+    // Shrink nav on scroll
+    window.addEventListener('scroll', () => {
+      document.querySelector('nav').style.background =
+        window.scrollY > 40 ? 'rgba(5,8,15,0.98)' : 'rgba(5,8,15,0.85)';
+    });
+  </script>
+</body>
+</html>
