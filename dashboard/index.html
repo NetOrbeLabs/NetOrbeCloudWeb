@@ -837,9 +837,10 @@ select.form-input { appearance: none; cursor: pointer; }
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-// ────────────────────────────────────────────────────────────────
-// CONFIG
-// ────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// GLOBAL CONFIG — fuente de verdad para toda la app y el admin
+// Cualquier cambio aquí se refleja en ambas páginas.
+// ════════════════════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBV7Y4MpYriQoJwIJ3h12H_V2OcYNO9yDs",
   authDomain: "netorbegroup.firebaseapp.com",
@@ -850,15 +851,59 @@ const FIREBASE_CONFIG = {
   appId: "1:105267221348:web:2b89cb2d17bda971306071"
 };
 
-const WORKER_URL = "https://upload.apis.netorbe.lat";
-const ADMIN_EMAIL = "netorbewebhosting@gmail.com";
+const WORKER_URL   = "https://upload.apis.netorbe.lat";
+const ADMIN_EMAIL  = "netorbewebhosting@gmail.com";
 
-// Plan definitions (MB)
+// ── PLANES ──────────────────────────────────────────────────────
+// storageMB   : límite total de almacenamiento en MB
+// maxFileMB   : tamaño máximo por archivo en MB
+// maxFiles    : número máximo de archivos permitidos (0 = ilimitado)
+// price       : precio mostrado al usuario
+// color       : color de acento del plan
+// ── NOTA: admin.html escribe storageLimit (MB) y storageUsed (bytes)
+//          en users/$uid directamente (sin /profile).
+//          Mantener sincronizados los nombres de campo aquí.
 const PLANS = {
-  free:     { name: "Gratuito",  storageMB: 1024,      maxFileMB: 50,    price: "$0/mes",  color: "#64748b" },
-  pro:      { name: "Pro",       storageMB: 51200,     maxFileMB: 2048,  price: "$5/mes",  color: "#2563eb" },
-  business: { name: "Business",  storageMB: 512000,    maxFileMB: 99999, price: "$20/mes", color: "#10b981" }
+  free: {
+    name:       "Gratuito",
+    storageMB:  1024,          // 1 GB
+    maxFileMB:  50,            // 50 MB por archivo
+    maxFiles:   50,
+    price:      "$0",
+    period:     "mes",
+    color:      "#64748b",
+    features:   ["1 GB de almacenamiento", "Archivos hasta 50 MB", "50 archivos máximo"]
+  },
+  pro: {
+    name:       "Pro",
+    storageMB:  51200,         // 50 GB
+    maxFileMB:  2048,          // 2 GB por archivo
+    maxFiles:   0,
+    price:      "$5",
+    period:     "mes",
+    color:      "#2563eb",
+    features:   ["50 GB de almacenamiento", "Archivos hasta 2 GB", "Archivos ilimitados", "Soporte prioritario"]
+  },
+  business: {
+    name:       "Business",
+    storageMB:  512000,        // 500 GB
+    maxFileMB:  10240,         // 10 GB por archivo
+    maxFiles:   0,
+    price:      "$20",
+    period:     "mes",
+    color:      "#10b981",
+    features:   ["500 GB de almacenamiento", "Archivos hasta 10 GB", "Archivos ilimitados", "Soporte prioritario", "Compartir archivos"]
+  }
 };
+
+// ── CAMPO DB: ruta donde admin.html escribe (users/$uid) ──────────
+// plan         → string "free"|"pro"|"business"
+// planExpiry   → timestamp ms (número)
+// storageLimit → número en MB  (admin lo escribe)
+// storageUsed  → número en bytes (app lo actualiza)
+// blocked      → boolean
+// email        → string
+const DB_USER_PATH = uid => `users/${uid}`;
 
 // ────────────────────────────────────────────────────────────────
 // STATE
@@ -867,12 +912,21 @@ firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
 const db   = firebase.database();
 
-let currentUser   = null;
-let userKey       = "";
-let userPlanData  = { plan: "free", expiresAt: null, storageLimitMB: 1024 };
-let isAdmin       = false;
-let selectedFile  = null;
-let currentView   = "dashboard";
+let currentUser  = null;
+let userKey      = "";
+// userData: refleja en tiempo real lo que admin.html escribe
+let userData = {
+  plan:         "free",
+  planExpiry:   null,
+  storageLimit: PLANS.free.storageMB,  // MB
+  storageUsed:  0,                     // bytes
+  blocked:      false,
+  email:        ""
+};
+let isAdmin      = false;
+let selectedFile = null;
+let currentView  = "dashboard";
+let planListener = null;  // Firebase realtime listener
 
 // ────────────────────────────────────────────────────────────────
 // UTILS
@@ -984,12 +1038,18 @@ async function registerUser() {
     // Register key in worker
     await fetch(`${WORKER_URL}/regs`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "cipher-key": "77ac56c783ad137dcfbda7a59aba49e6efd71cb28f5410d052eef7869224ac82" },
+      headers: { "Content-Type": "application/json", "cipher-key": "REPLACE_WITH_CIPHER_KEY" },
       body: JSON.stringify({ uid, email, sha256Key: key })
     }).catch(()=>{});
-    // Init user profile in Firebase
-    await db.ref(`users/${uid}/profile`).set({
-      email, plan: "free", storageLimitMB: 1024, createdAt: new Date().toISOString(), expiresAt: null, storageUsedBytes: 0
+    // Crear perfil en Firebase — campos unificados con admin.html
+    await db.ref(DB_USER_PATH(uid)).set({
+      email,
+      plan:         "free",
+      storageLimit: PLANS.free.storageMB,   // MB
+      storageUsed:  0,                       // bytes
+      planExpiry:   null,
+      blocked:      false,
+      createdAt:    Date.now()
     });
     toast("Cuenta creada. Bienvenido a NetOrbe Cloud.", "success");
   } catch(e) {
@@ -1006,7 +1066,7 @@ function logout() {
 
 // ────────────────────────────────────────────────────────────────
 // AUTH STATE
-// ────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────���──
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     currentUser = user;
@@ -1022,95 +1082,129 @@ auth.onAuthStateChanged(async (user) => {
       document.getElementById("adminNav").style.display = "block";
     }
 
-    await loadUserPlan();
+    // Suscribir listener en tiempo real: reacciona a cambios del admin
+    subscribePlan(user.uid);
     await loadDashboard();
   } else {
+    // Limpiar listener al cerrar sesión
+    if (planListener && currentUser) {
+      db.ref(DB_USER_PATH(currentUser.uid)).off("value", planListener);
+      planListener = null;
+    }
     currentUser = null; userKey = ""; isAdmin = false;
+    userData = { plan:"free", planExpiry:null, storageLimit:PLANS.free.storageMB, storageUsed:0, blocked:false, email:"" };
     document.getElementById("authOverlay").classList.remove("hidden");
   }
 });
 
 // ────────────────────────────────────────────────────────────────
-// PLAN LOADING
+// PLAN — escucha en TIEMPO REAL cambios del admin
+// Se llama una vez al hacer login; Firebase dispara el callback
+// cada vez que admin.html hace PATCH sobre users/$uid.
 // ────────────────────────────────────────────────────────────────
-async function loadUserPlan() {
-  if (!currentUser) return;
-  try {
-    const snap = await db.ref(`users/${currentUser.uid}/profile`).once("value");
+function subscribePlan(uid) {
+  // Cancelar listener previo si existe
+  if (planListener) {
+    db.ref(DB_USER_PATH(uid)).off("value", planListener);
+    planListener = null;
+  }
+
+  planListener = db.ref(DB_USER_PATH(uid)).on("value", snap => {
     const data = snap.val() || {};
-    const planKey = data.plan || "free";
-    const planDef = PLANS[planKey] || PLANS.free;
-    userPlanData = {
-      plan: planKey,
-      expiresAt: data.expiresAt || null,
-      storageLimitMB: data.storageLimitMB || planDef.storageMB,
-      storageUsedBytes: data.storageUsedBytes || 0
+
+    // Sincronizar userData con los campos que escribe admin.html
+    const planKey     = data.plan || "free";
+    const planDef     = PLANS[planKey] || PLANS.free;
+    userData = {
+      plan:         planKey,
+      planExpiry:   data.planExpiry   || null,   // timestamp ms (número)
+      storageLimit: data.storageLimit || planDef.storageMB,  // MB
+      storageUsed:  data.storageUsed  || 0,      // bytes
+      blocked:      data.blocked === true || data.blocked === "true",
+      email:        data.email        || (currentUser?.email || "")
     };
-    // Check expiry
-    const now = new Date();
-    const expDate = userPlanData.expiresAt ? new Date(userPlanData.expiresAt) : null;
-    const isExpired = expDate && expDate < now;
-    const isWarning = expDate && !isExpired && (expDate - now) < 7 * 86400000;
-    const planName = planDef.name;
-    const expiryStr = expDate ? expDate.toLocaleDateString("es-ES") : "Sin vencimiento";
 
-    // Update sidebar badge
-    document.getElementById("sidebarPlanBadge").textContent = planName;
-
-    // Update plan banners
-    ["Dash","Plan"].forEach(suf => {
-      const b = document.getElementById(`planBanner${suf}`);
-      const n = document.getElementById(`planName${suf}`);
-      const s = document.getElementById(`planStatus${suf}`);
-      if (!b||!n||!s) return;
-      n.textContent = `Plan ${planName}`;
-      if (isExpired) {
-        b.className = "plan-banner expired";
-        s.className = "plan-status expired";
-        s.textContent = `Vencido el ${expiryStr} — Acceso a archivos bloqueado`;
-      } else if (isWarning) {
-        b.className = "plan-banner warning";
-        s.className = "plan-status warning";
-        s.textContent = `Por vencer el ${expiryStr} — Renueva pronto`;
-      } else {
-        b.className = "plan-banner";
-        s.className = "plan-status";
-        s.textContent = expDate ? `Activo hasta el ${expiryStr}` : "Plan activo";
-      }
-    });
-
-    // Block upload/files if expired
-    if (isExpired) {
-      blockSection("uploadCardWrap", "Tu plan ha vencido. Contacta al administrador para renovar.");
-      blockSection("filesCardWrap", "Tu plan ha vencido. Los archivos están bloqueados.");
-    } else {
-      unblockSection("uploadCardWrap");
-      unblockSection("filesCardWrap");
-    }
-
-    // Update dashboard stats
-    const usedMB = userPlanData.storageUsedBytes / (1024*1024);
-    const limitMB = userPlanData.storageLimitMB;
-    const pct = Math.min(100, (usedMB / limitMB) * 100).toFixed(1);
-
-    document.getElementById("dashPlanName").textContent = planName;
-    document.getElementById("dashPlanExpiry").textContent = expDate ? `Vence: ${expiryStr}` : "Sin vencimiento";
-    document.getElementById("dashStorageUsed").textContent = fmtMB(Math.round(usedMB));
-    document.getElementById("dashStorageLimit").textContent = `de ${fmtMB(limitMB)} disponible`;
-    document.getElementById("dashStoragePct").textContent = `${pct}% usado`;
-    document.getElementById("storageBarUsed").textContent = fmtMB(Math.round(usedMB)) + " usado";
-    document.getElementById("storageBarTotal").textContent = fmtMB(limitMB) + " total";
-    const fill = document.getElementById("storageBarFill");
-    fill.style.width = pct + "%";
-    fill.className = "storage-bar-fill" + (parseFloat(pct) > 80 ? " warning" : "");
-    document.getElementById("uploadStorageInfo").textContent = `${fmtMB(Math.round(usedMB))} de ${fmtMB(limitMB)} usado`;
-
-    // Max file size hint
-    const maxMB = PLANS[planKey]?.maxFileMB || 50;
-    document.getElementById("dzLimit").textContent = `Tamaño máximo por archivo: ${fmtMB(maxMB)}`;
-
-  } catch(e) { console.error("[v0] loadUserPlan error:", e); }
+    applyPlanUI();
+  });
 }
+
+function applyPlanUI() {
+  const planKey    = userData.plan;
+  const planDef    = PLANS[planKey] || PLANS.free;
+  const planName   = planDef.name;
+  const now        = Date.now();
+  const expMs      = userData.planExpiry;
+  const expDate    = expMs ? new Date(expMs) : null;
+  const isExpired  = expDate && expDate.getTime() < now;
+  const isWarning  = expDate && !isExpired && (expDate.getTime() - now) < 7 * 86400000;
+  const isBlocked  = userData.blocked;
+  const expiryStr  = expDate ? expDate.toLocaleDateString("es-ES") : "Sin vencimiento";
+
+  // Sidebar badge
+  document.getElementById("sidebarPlanBadge").textContent = planName;
+
+  // Plan banners (dashboard y vista plan)
+  ["Dash","Plan"].forEach(suf => {
+    const b = document.getElementById(`planBanner${suf}`);
+    const n = document.getElementById(`planName${suf}`);
+    const s = document.getElementById(`planStatus${suf}`);
+    if (!b||!n||!s) return;
+    n.textContent = `Plan ${planName}`;
+    if (isBlocked) {
+      b.className = "plan-banner expired";
+      s.className = "plan-status expired";
+      s.textContent = "Cuenta bloqueada — Contacta al administrador";
+    } else if (isExpired) {
+      b.className = "plan-banner expired";
+      s.className = "plan-status expired";
+      s.textContent = `Vencido el ${expiryStr} — Acceso a archivos bloqueado`;
+    } else if (isWarning) {
+      b.className = "plan-banner warning";
+      s.className = "plan-status warning";
+      s.textContent = `Por vencer el ${expiryStr} — Renueva pronto`;
+    } else {
+      b.className = "plan-banner";
+      s.className = "plan-status";
+      s.textContent = expDate ? `Activo hasta el ${expiryStr}` : "Plan activo";
+    }
+  });
+
+  // Bloquear secciones si expirado o bloqueado
+  if (isExpired || isBlocked) {
+    const msg = isBlocked
+      ? "Tu cuenta está bloqueada. Contacta al administrador."
+      : "Tu plan ha vencido. Contacta al administrador para renovar.";
+    blockSection("uploadCardWrap", msg);
+    blockSection("filesCardWrap",  msg);
+  } else {
+    unblockSection("uploadCardWrap");
+    unblockSection("filesCardWrap");
+  }
+
+  // Stats de almacenamiento
+  const usedBytes  = userData.storageUsed;
+  const limitMB    = userData.storageLimit;
+  const usedMB     = usedBytes / (1024 * 1024);
+  const pct        = Math.min(100, limitMB > 0 ? (usedMB / limitMB) * 100 : 0).toFixed(1);
+  const maxFileMB  = planDef.maxFileMB;
+
+  document.getElementById("dashPlanName").textContent    = planName;
+  document.getElementById("dashPlanExpiry").textContent  = expDate ? `Vence: ${expiryStr}` : "Sin vencimiento";
+  document.getElementById("dashStorageUsed").textContent = fmtMB(Math.round(usedMB));
+  document.getElementById("dashStorageLimit").textContent= `de ${fmtMB(limitMB)} disponible`;
+  document.getElementById("dashStoragePct").textContent  = `${pct}% usado`;
+  document.getElementById("storageBarUsed").textContent  = fmtMB(Math.round(usedMB)) + " usado";
+  document.getElementById("storageBarTotal").textContent = fmtMB(limitMB) + " total";
+  document.getElementById("uploadStorageInfo").textContent = `${fmtMB(Math.round(usedMB))} de ${fmtMB(limitMB)} usado`;
+  document.getElementById("dzLimit").textContent = `Tamaño máximo por archivo: ${fmtMB(maxFileMB)}`;
+
+  const fill = document.getElementById("storageBarFill");
+  fill.style.width    = pct + "%";
+  fill.className      = "storage-bar-fill" + (parseFloat(pct) > 80 ? " warning" : "");
+}
+
+// Compatibilidad con código que llamaba loadUserPlan()
+async function loadUserPlan() { /* el listener en tiempo real lo maneja */ }
 
 function blockSection(id, msg) {
   const el = document.getElementById(id);
@@ -1193,7 +1287,7 @@ function fileItemHTML(file, compact = false) {
     </div>
     <div class="file-actions">
       <a href="${url}" target="_blank" rel="noopener" class="btn-sm ghost">Ver</a>
-      ${!compact ? `<button class="btn-sm danger" onclick="deleteFile('${file.path}','${file.name}')">Eliminar</button>` : ''}
+      ${!compact ? `<button class="btn-sm danger" onclick="deleteFile('${file.path}','${file.name}',${file.size||0})">Eliminar</button>` : ''}
     </div>
   </li>`;
 }
@@ -1228,9 +1322,10 @@ dropZone.addEventListener("drop", e => {
 fileInput.addEventListener("change", e => { if (e.target.files[0]) setSelectedFile(e.target.files[0]); });
 
 function setSelectedFile(file) {
-  const maxMB = PLANS[userPlanData.plan]?.maxFileMB || 50;
+  const planDef = PLANS[userData.plan] || PLANS.free;
+  const maxMB   = planDef.maxFileMB;
   if (file.size > maxMB * 1024 * 1024) {
-    toast(`Archivo demasiado grande. Máximo ${fmtMB(maxMB)} para tu plan.`, "error");
+    toast(`Archivo demasiado grande. Máximo ${fmtMB(maxMB)} para tu plan ${planDef.name}.`, "error");
     return;
   }
   selectedFile = file;
@@ -1241,15 +1336,33 @@ function setSelectedFile(file) {
 async function uploadFile() {
   if (!selectedFile) { toast("Selecciona un archivo primero.", "error"); return; }
 
-  // Check plan expiry
-  const expDate = userPlanData.expiresAt ? new Date(userPlanData.expiresAt) : null;
-  if (expDate && expDate < new Date()) { toast("Tu plan ha vencido. Contacta al administrador.", "error"); return; }
+  // Verificar bloqueo de cuenta
+  if (userData.blocked) { toast("Tu cuenta está bloqueada. Contacta al administrador.", "error"); return; }
 
-  // Check storage limit
-  const usedBytes = userPlanData.storageUsedBytes || 0;
-  const limitBytes = (userPlanData.storageLimitMB || 1024) * 1024 * 1024;  // Convert to bytes: limitMB * 1MB
+  // Verificar vencimiento del plan
+  const expMs  = userData.planExpiry;
+  const expDate = expMs ? new Date(expMs) : null;
+  if (expDate && expDate.getTime() < Date.now()) {
+    toast("Tu plan ha vencido. Contacta al administrador.", "error"); return;
+  }
+
+  // Verificar límite de almacenamiento (storageUsed en bytes, storageLimit en MB)
+  const usedBytes  = userData.storageUsed || 0;
+  const limitBytes = (userData.storageLimit || PLANS.free.storageMB) * 1024 * 1024;
   if (usedBytes + selectedFile.size > limitBytes) {
     toast("Límite de almacenamiento alcanzado. Actualiza tu plan.", "error"); return;
+  }
+
+  // Verificar límite de archivos del plan
+  const planDef = PLANS[userData.plan] || PLANS.free;
+  if (planDef.maxFiles > 0) {
+    try {
+      const countSnap = await db.ref(`files/${currentUser.uid}`).once("value");
+      const count = countSnap.val() ? Object.keys(countSnap.val()).length : 0;
+      if (count >= planDef.maxFiles) {
+        toast(`Límite de ${planDef.maxFiles} archivos alcanzado para el plan ${planDef.name}.`, "error"); return;
+      }
+    } catch(_) {}
   }
 
   const btn = document.getElementById("uploadBtn");
@@ -1285,10 +1398,10 @@ async function uploadFile() {
       document.getElementById("progressFill").style.width = "100%";
       document.getElementById("progressLabel").textContent = "¡Subido con éxito!";
 
-      // Update storage usage in Firebase
-      const newUsed = (userPlanData.storageUsedBytes || 0) + selectedFile.size;
-      await db.ref(`users/${currentUser.uid}/profile/storageUsedBytes`).set(newUsed);
-      userPlanData.storageUsedBytes = newUsed;
+      // Actualizar storageUsed en Firebase (campo unificado con admin.html)
+      const newUsed = (userData.storageUsed || 0) + selectedFile.size;
+      await db.ref(`${DB_USER_PATH(currentUser.uid)}/storageUsed`).set(newUsed);
+      // userData se actualizará automáticamente por el listener onValue
 
       toast(`${selectedFile.name} subido correctamente.`, "success");
       selectedFile = null;
@@ -1310,14 +1423,24 @@ async function uploadFile() {
 // ────────────────────────────────────────────────────────────────
 // DELETE FILE
 // ────────────────────────────────────────────────────────────────
-async function deleteFile(filePath, fileName) {
+async function deleteFile(filePath, fileName, fileSize) {
   if (!confirm(`¿Eliminar "${fileName}"? Esta acción no se puede deshacer.`)) return;
   try {
     const res = await fetch(WORKER_URL, {
       method: "DELETE",
-      headers: { "x-netorbe-authkey": userKey, "x-netorbe-fp": filePath, "x-netorbe-userid-auth": currentUser.uid }
+      headers: {
+        "x-netorbe-authkey": userKey,
+        "x-netorbe-fp": filePath,
+        "x-netorbe-userid-auth": currentUser.uid
+      }
     });
     if (res.ok) {
+      // Descontar espacio usado al eliminar
+      if (fileSize && fileSize > 0) {
+        const newUsed = Math.max(0, (userData.storageUsed || 0) - fileSize);
+        await db.ref(`${DB_USER_PATH(currentUser.uid)}/storageUsed`).set(newUsed);
+        // userData se actualiza por el listener onValue automáticamente
+      }
       toast(`${fileName} eliminado.`, "success");
       loadUserFiles();
       loadDashboard();
@@ -1333,17 +1456,18 @@ async function deleteFile(filePath, fileName) {
 function renderPlanGrid() {
   const grid = document.getElementById("planGrid");
   grid.innerHTML = Object.entries(PLANS).map(([key, plan]) => {
-    const isCurrent = key === userPlanData.plan;
+    const isCurrent = key === userData.plan;
     return `<div class="plan-card ${isCurrent ? 'current' : ''}">
       ${isCurrent ? '<div class="plan-card-badge">ACTUAL</div>' : ''}
       <h3>${plan.name}</h3>
-      <div class="price">${plan.price.split("/")[0]}<span>/mes</span></div>
+      <div class="price">${plan.price}<span>/${plan.period}</span></div>
       <div class="plan-storage">${fmtMB(plan.storageMB)} de almacenamiento</div>
       <ul>
-        <li><span class="ck">&#10003;</span> Archivos hasta ${fmtMB(plan.maxFileMB)}</li>
-        <li><span class="ck">&#10003;</span> ${fmtMB(plan.storageMB)} storage</li>
-        ${key !== 'free' ? '<li><span class="ck">&#10003;</span> Soporte prioritario</li>' : ''}
-        ${key === 'business' ? '<li><span class="ck">&#10003;</span> Compartir archivos</li>' : ''}
+        ${plan.features.map(f => `<li><span class="ck">&#10003;</span> ${f}</li>`).join('')}
+        <li><span class="ck">&#10003;</span> Archivo max: ${fmtMB(plan.maxFileMB)}</li>
+        ${plan.maxFiles > 0
+          ? `<li><span class="ck">&#10003;</span> Hasta ${plan.maxFiles} archivos</li>`
+          : `<li><span class="ck">&#10003;</span> Archivos ilimitados</li>`}
       </ul>
     </div>`;
   }).join('');
@@ -1357,91 +1481,113 @@ async function loadAdminData() {
   try {
     const snap = await db.ref("users").once("value");
     const users = snap.val() || {};
-    const uids = Object.keys(users);
-    const profiles = uids.map(uid => ({ uid, ...(users[uid].profile||{}) }));
+    // Ruta unificada: users/$uid (sin /profile), mismo que admin.html
+    const profiles = Object.entries(users).map(([uid, data]) => ({ uid, ...data }));
 
-    const total = profiles.length;
-    const active = profiles.filter(u => { const e=u.expiresAt?new Date(u.expiresAt):null; return !e||e>=new Date(); }).length;
-    const expired = total - active;
-    const totalBytes = profiles.reduce((s,u) => s + (u.storageUsedBytes||0), 0);
+    const now    = Date.now();
+    const total  = profiles.length;
+    const active = profiles.filter(u => {
+      if (u.blocked) return false;
+      const e = u.planExpiry;
+      return !e || e > now || u.plan === "free";
+    }).length;
+    const expired    = profiles.filter(u => u.plan !== "free" && u.planExpiry && u.planExpiry < now).length;
+    const totalBytes = profiles.reduce((s,u) => s + (u.storageUsed||0), 0);
 
-    document.getElementById("adminTotalUsers").textContent = total;
-    document.getElementById("adminActivePlans").textContent = active;
-    document.getElementById("adminExpiredPlans").textContent = expired;
-    document.getElementById("adminTotalStorage").textContent = fmtSize(totalBytes);
+    document.getElementById("adminTotalUsers").textContent    = total;
+    document.getElementById("adminActivePlans").textContent   = active;
+    document.getElementById("adminExpiredPlans").textContent  = expired;
+    document.getElementById("adminTotalStorage").textContent  = fmtSize(totalBytes);
 
     const tbody = document.getElementById("adminTableBody");
-    if (!profiles.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Sin usuarios.</td></tr>`; return; }
+    if (!profiles.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Sin usuarios.</td></tr>`;
+      return;
+    }
 
     tbody.innerHTML = profiles.map(u => {
-      const now = new Date();
-      const expDate = u.expiresAt ? new Date(u.expiresAt) : null;
-      const isExp = expDate && expDate < now;
-      const isWarn = expDate && !isExp && (expDate-now) < 7*86400000;
-      const planKey = u.plan || "free";
+      const planKey  = u.plan || "free";
       const planName = PLANS[planKey]?.name || "Gratuito";
-      const used = fmtSize(u.storageUsedBytes||0);
-      const limitMB = u.storageLimitMB || PLANS[planKey]?.storageMB || 1024;
-      const statusDot = isExp ? "expired" : isWarn ? "warning" : "active";
-      const statusText = isExp ? "Vencido" : isWarn ? "Por vencer" : "Activo";
+      const expMs    = u.planExpiry || null;
+      const expDate  = expMs ? new Date(expMs) : null;
+      const isExp    = expDate && expDate.getTime() < now;
+      const isWarn   = expDate && !isExp && (expDate.getTime() - now) < 7 * 86400000;
+      const isBlk    = u.blocked === true || u.blocked === "true";
+      const limitMB  = u.storageLimit || PLANS[planKey]?.storageMB || 1024;
+      const used     = fmtSize(u.storageUsed || 0);
+      const statusDot  = isBlk ? "warning" : isExp ? "expired" : isWarn ? "warning" : "active";
+      const statusText = isBlk ? "Bloqueado" : isExp ? "Vencido" : isWarn ? "Por vencer" : "Activo";
+      const expiryDisp = expDate ? expDate.toLocaleDateString("es-ES") : (planKey==="free" ? "Sin vencimiento" : "—");
       return `<tr>
         <td><strong>${u.email||"—"}</strong></td>
         <td><span class="plan-tag ${isExp?'expired':planKey}">${planName}</span></td>
         <td><span class="status-dot ${statusDot}"></span>${statusText}</td>
         <td>${used} / ${fmtMB(limitMB)}</td>
-        <td>${expDate ? expDate.toLocaleDateString("es-ES") : "Sin vencimiento"}</td>
-        <td><button class="btn-sm ghost" onclick="openEditUser('${u.uid}','${u.email}','${planKey}','${u.expiresAt||''}',${limitMB})">Editar</button></td>
+        <td>${expiryDisp}</td>
+        <td><button class="btn-sm ghost" onclick="openEditUser('${u.uid}','${u.email||''}','${planKey}',${expMs||'null'},${limitMB})">Editar</button></td>
       </tr>`;
     }).join('');
-  } catch(e) { console.error("[v0] loadAdminData:", e); toast("Error al cargar datos admin.", "error"); }
+  } catch(e) { console.error("loadAdminData:", e); toast("Error al cargar datos admin.", "error"); }
 }
 
 async function loadAdminUsers() {
   if (!isAdmin) return;
-  await loadAdminData();
   const snap = await db.ref("users").once("value");
   const users = snap.val() || {};
-  const profiles = Object.entries(users).map(([uid,data]) => ({ uid, ...(data.profile||{}) }));
+  const profiles = Object.entries(users).map(([uid, data]) => ({ uid, ...data }));
   const tbody = document.getElementById("adminUsersBody");
-  if (!profiles.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Sin usuarios.</td></tr>`; return; }
+  if (!profiles.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Sin usuarios.</td></tr>`;
+    return;
+  }
+  const now = Date.now();
   tbody.innerHTML = profiles.map(u => {
-    const planKey = u.plan||"free";
+    const planKey = u.plan || "free";
     const planDef = PLANS[planKey] || PLANS.free;
-    const expDate = u.expiresAt ? new Date(u.expiresAt).toLocaleDateString("es-ES") : "—";
-    const used = fmtSize(u.storageUsedBytes||0);
-    const limitMB = u.storageLimitMB || planDef.storageMB;
+    const expMs   = u.planExpiry || null;
+    const expDisp = expMs ? new Date(expMs).toLocaleDateString("es-ES") : "—";
+    const used    = fmtSize(u.storageUsed || 0);
+    const limitMB = u.storageLimit || planDef.storageMB;
     return `<tr>
       <td><code style="font-size:0.75rem;color:var(--text-faint)">${u.uid.substring(0,12)}...</code></td>
       <td><strong>${u.email||"—"}</strong></td>
       <td><span class="plan-tag ${planKey}">${planDef.name}</span></td>
-      <td>${expDate}</td>
+      <td>${expDisp}</td>
       <td>${used} / ${fmtMB(limitMB)}</td>
-      <td><button class="btn-sm ghost" onclick="openEditUser('${u.uid}','${u.email}','${planKey}','${u.expiresAt||''}',${limitMB})">Editar</button></td>
+      <td><button class="btn-sm ghost" onclick="openEditUser('${u.uid}','${u.email||''}','${planKey}',${expMs||'null'},${limitMB})">Editar</button></td>
     </tr>`;
   }).join('');
 }
 
-function openEditUser(uid, email, plan, expiresAt, storageLimitMB) {
-  document.getElementById("editUserId").value = uid;
-  document.getElementById("editUserEmail").value = email;
-  document.getElementById("editUserPlan").value = plan;
-  document.getElementById("editUserExpiry").value = expiresAt ? expiresAt.split("T")[0] : "";
-  document.getElementById("editUserStorage").value = storageLimitMB;
+function openEditUser(uid, email, plan, planExpiry, storageLimit) {
+  document.getElementById("editUserId").value      = uid;
+  document.getElementById("editUserEmail").value   = email;
+  document.getElementById("editUserPlan").value    = plan;
+  document.getElementById("editUserStorage").value = storageLimit;
+  // planExpiry llega como timestamp ms o null
+  if (planExpiry && planExpiry !== "null") {
+    const d = new Date(Number(planExpiry));
+    document.getElementById("editUserExpiry").value = d.toISOString().split("T")[0];
+  } else {
+    document.getElementById("editUserExpiry").value = "";
+  }
   clearStatus("editStatus");
   openModal("modalEditUser");
 }
 
 async function saveUserEdit() {
   if (!isAdmin) { toast("Acceso denegado.", "error"); return; }
-  const uid = document.getElementById("editUserId").value;
-  const plan = document.getElementById("editUserPlan").value;
-  const expiryVal = document.getElementById("editUserExpiry").value;
-  const storageMB = parseInt(document.getElementById("editUserStorage").value) || PLANS[plan]?.storageMB || 1024;
-  const expiresAt = expiryVal ? new Date(expiryVal).toISOString() : null;
+  const uid        = document.getElementById("editUserId").value;
+  const plan       = document.getElementById("editUserPlan").value;
+  const expiryVal  = document.getElementById("editUserExpiry").value;
+  const storageMB  = parseInt(document.getElementById("editUserStorage").value) || PLANS[plan]?.storageMB || 1024;
+  // planExpiry como timestamp ms (número), igual que admin.html
+  const planExpiry = expiryVal ? new Date(expiryVal).getTime() : null;
   const btn = document.getElementById("saveEditBtn");
   btn.disabled = true; btn.textContent = "Guardando...";
   try {
-    await db.ref(`users/${uid}/profile`).update({ plan, expiresAt, storageLimitMB: storageMB });
+    // Ruta unificada users/$uid (sin /profile)
+    await db.ref(DB_USER_PATH(uid)).update({ plan, planExpiry, storageLimit: storageMB });
     toast("Usuario actualizado correctamente.", "success");
     closeModal("modalEditUser");
     loadAdminData();
@@ -1458,23 +1604,32 @@ function renderAdminPlans() {
   grid.innerHTML = Object.entries(PLANS).map(([key, plan]) => `
     <div class="plan-card">
       <h3>${plan.name}</h3>
-      <div class="price">${plan.price.split("/")[0]}<span>/mes</span></div>
-      <div class="plan-storage">Almacenamiento: ${fmtMB(plan.storageMB)}</div>
+      <div class="price">${plan.price}<span>/${plan.period}</span></div>
+      <div class="plan-storage">Storage: ${fmtMB(plan.storageMB)}</div>
       <ul>
-        <li><span class="ck">&#10003;</span> Archivos hasta ${fmtMB(plan.maxFileMB)}</li>
-        <li><span class="ck">&#10003;</span> Identificador: <code>${key}</code></li>
+        <li><span class="ck">&#10003;</span> Max por archivo: ${fmtMB(plan.maxFileMB)}</li>
+        <li><span class="ck">&#10003;</span> ${plan.maxFiles > 0 ? `Hasta ${plan.maxFiles} archivos` : "Archivos ilimitados"}</li>
+        <li><span class="ck">&#10003;</span> ID: <code style="font-size:0.75rem">${key}</code></li>
       </ul>
     </div>
   `).join('');
 
-  // Plan stats
+  // Estadísticas por plan — ruta unificada users/$uid (sin /profile)
   db.ref("users").once("value").then(snap => {
     const users = snap.val() || {};
     const counts = { free: 0, pro: 0, business: 0 };
-    Object.values(users).forEach(u => { const p = u.profile?.plan || "free"; if (counts[p] !== undefined) counts[p]++; });
+    Object.values(users).forEach(u => {
+      const p = u.plan || "free";
+      if (counts[p] !== undefined) counts[p]++;
+    });
     document.getElementById("planStats").innerHTML = `
       <div class="stats-grid" style="margin:0">
-        ${Object.entries(counts).map(([k,v]) => `<div class="stat-card"><div class="label">${PLANS[k]?.name||k}</div><div class="value">${v}</div><div class="sub">usuarios</div></div>`).join('')}
+        ${Object.entries(counts).map(([k,v]) => `
+          <div class="stat-card">
+            <div class="label">${PLANS[k]?.name||k}</div>
+            <div class="value">${v}</div>
+            <div class="sub">usuarios activos</div>
+          </div>`).join('')}
       </div>`;
   });
 }

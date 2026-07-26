@@ -14,31 +14,32 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --blue: #2563eb;
-  --blue-light: #3b82f6;
-  --blue-glow: rgba(37,99,235,0.25);
-  --dark: #05080f;
-  --dark-2: #0a0e1a;
-  --dark-3: #0f1420;
-  --dark-4: #141924;
-  --surface: #111827;
-  --surface-2: #1a2235;
-  --surface-3: #1e2840;
-  --border: rgba(255,255,255,0.07);
+  --blue:         #2563eb;
+  --blue-light:   #3b82f6;
+  --blue-glow:    rgba(37,99,235,0.25);
+  --dark:         #05080f;
+  --dark-2:       #0a0e1a;
+  --dark-3:       #0f1420;
+  --dark-4:       #141924;
+  --surface:      #111827;
+  --surface-2:    #1a2235;
+  --surface-3:    #1e2840;
+  --border:       rgba(255,255,255,0.07);
   --border-light: rgba(255,255,255,0.12);
-  --text: #f1f5f9;
-  --text-muted: #94a3b8;
-  --text-faint: #4b5563;
-  --accent: #06b6d4;
-  --green: #10b981;
-  --red: #ef4444;
-  --orange: #f59e0b;
-  --radius: 10px;
-  --radius-lg: 16px;
+  --text:         #f1f5f9;
+  --text-muted:   #94a3b8;
+  --text-faint:   #4b5563;
+  --accent:       #06b6d4;
+  --green:        #10b981;
+  --red:          #ef4444;
+  --orange:       #f59e0b;
+  --radius:       10px;
+  --radius-lg:    16px;
+  --sidebar-w:    260px;
+  --topbar-h:     62px;
 }
 
 html, body { height: 100%; }
-
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--dark);
@@ -47,814 +48,935 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
 }
 
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 2px; }
 
-/* ── GRID NOISE BACKGROUND ── */
+/* ── BACKGROUND ── */
 body::before {
   content: '';
   position: fixed; inset: 0; z-index: 0;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37,99,235,0.18) 0%, transparent 70%),
-    repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.02) 60px),
-    repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.02) 60px);
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37,99,235,0.16) 0%, transparent 70%),
+    repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.018) 60px),
+    repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.018) 60px);
   pointer-events: none;
 }
 
-/* ── SCREENS ── */
+/* ══════════════════════════════════════════════════
+   AUTH SCREENS  (login + key)
+══════════════════════════════════════════════════ */
 .screen {
   position: relative; z-index: 1;
   width: 100%; max-width: 460px;
-  display: none;
-  flex-direction: column;
-  gap: 0;
+  padding: 20px;
+  display: none; flex-direction: column; gap: 0;
 }
 .screen.active { display: flex; }
 
-/* ── LOGO ── */
 .logo-wrap {
   display: flex; flex-direction: column;
-  align-items: center; gap: 10px;
-  margin-bottom: 36px;
+  align-items: center; gap: 8px;
+  margin-bottom: 32px;
 }
 .logo-icon {
-  width: 56px; height: 56px;
+  width: 52px; height: 52px;
   background: linear-gradient(135deg, var(--blue), var(--accent));
   border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 32px var(--blue-glow);
+  box-shadow: 0 0 28px var(--blue-glow);
 }
-.logo-icon svg { width: 28px; height: 28px; color: #fff; }
+.logo-icon svg { width: 26px; height: 26px; color: #fff; }
 .logo-name {
-  font-size: 22px; font-weight: 800;
-  letter-spacing: -0.5px;
+  font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
   background: linear-gradient(135deg, #fff 40%, var(--accent));
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .logo-badge {
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text-faint);
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--red);
+  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25);
+  padding: 2px 10px; border-radius: 20px;
 }
 
-/* ── CARD ── */
 .card {
   background: var(--surface);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 32px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  padding: 28px 28px 24px;
 }
-
 .card-title {
-  font-size: 20px; font-weight: 700;
-  margin-bottom: 6px;
-  letter-spacing: -0.3px;
+  font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 .card-sub {
-  font-size: 13px; color: var(--text-muted);
-  line-height: 1.6; margin-bottom: 28px;
+  font-size: 0.825rem; color: var(--text-muted);
+  margin-bottom: 22px; line-height: 1.55;
 }
 
-/* ── FORM ── */
-.field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
-.field label {
-  font-size: 12px; font-weight: 600;
-  letter-spacing: 0.5px; text-transform: uppercase;
-  color: var(--text-muted);
-}
-.input-wrap { position: relative; display: flex; align-items: center; }
-.input-wrap svg {
-  position: absolute; left: 14px;
-  width: 16px; height: 16px;
-  color: var(--text-faint);
-  pointer-events: none;
-  flex-shrink: 0;
-}
-input[type="text"], input[type="email"], input[type="password"] {
-  width: 100%;
-  background: var(--dark-3);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: 12px 14px 12px 42px;
-  color: var(--text);
-  font-family: inherit; font-size: 14px;
-  outline: none;
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; letter-spacing: 0.04em; text-transform: uppercase; }
+.input-wrap { position: relative; }
+.input-wrap input {
+  width: 100%; background: var(--dark-3); border: 1px solid var(--border-light);
+  border-radius: var(--radius); color: var(--text); font-size: 14px;
+  font-family: inherit; padding: 10px 14px; outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-input:focus {
-  border-color: var(--blue-light);
-  box-shadow: 0 0 0 3px var(--blue-glow);
+.input-wrap input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+.input-wrap input::placeholder { color: var(--text-faint); }
+.pw-toggle {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-faint); cursor: pointer;
+  padding: 4px; display: flex; align-items: center;
 }
-input::placeholder { color: var(--text-faint); }
+.pw-toggle svg { width: 16px; height: 16px; }
 
-/* password toggle */
-.toggle-pw {
-  position: absolute; right: 12px;
-  background: none; border: none; cursor: pointer;
-  color: var(--text-faint);
-  display: flex; align-items: center;
-  padding: 4px;
-  transition: color 0.2s;
-}
-.toggle-pw:hover { color: var(--text-muted); }
-
-/* ── HINT ── */
-.hint {
-  font-size: 12px; color: var(--text-faint);
-  background: var(--dark-3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  line-height: 1.6;
-  margin-bottom: 20px;
-  display: flex; gap: 8px; align-items: flex-start;
-}
-.hint svg { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
-
-/* ── BUTTONS ── */
-.btn {
-  width: 100%;
-  padding: 13px 20px;
-  border: none; border-radius: var(--radius);
-  font-family: inherit; font-size: 14px; font-weight: 600;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all 0.2s;
-}
 .btn-primary {
-  background: var(--blue);
-  color: #fff;
-  box-shadow: 0 0 20px var(--blue-glow);
+  width: 100%; padding: 11px 18px; background: var(--blue);
+  border: none; border-radius: var(--radius); color: #fff;
+  font-size: 14px; font-weight: 600; font-family: inherit;
+  cursor: pointer; transition: background 0.2s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 6px;
 }
-.btn-primary:hover { background: var(--blue-light); transform: translateY(-1px); box-shadow: 0 4px 24px var(--blue-glow); }
-.btn-primary:active { transform: translateY(0); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary:hover { background: var(--blue-light); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.btn-ghost {
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border-light);
-  margin-top: 10px;
-}
-.btn-ghost:hover { background: var(--surface-2); color: var(--text); }
-
-/* ── ERROR / SUCCESS ── */
 .alert {
-  border-radius: var(--radius);
-  padding: 11px 14px;
-  font-size: 13px; font-weight: 500;
-  display: none; gap: 8px; align-items: center;
-  margin-bottom: 18px;
-  line-height: 1.5;
+  display: none; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+  border-radius: var(--radius); padding: 10px 14px;
+  font-size: 13px; color: #fca5a5; margin-top: 12px; line-height: 1.5;
 }
-.alert.show { display: flex; }
-.alert svg { width: 15px; height: 15px; flex-shrink: 0; }
-.alert-error { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
-.alert-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
-.alert-warn { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #fcd34d; }
+.alert.show { display: block; }
 
-/* ── DIVIDER ── */
-.divider {
-  display: flex; align-items: center; gap: 12px;
-  margin: 20px 0; color: var(--text-faint); font-size: 12px;
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1;
-  height: 1px; background: var(--border);
+.preview-url {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: var(--dark-2); border: 1px solid var(--border);
+  border-radius: 6px; font-family: monospace; font-size: 11px;
+  color: var(--accent); word-break: break-all;
 }
 
-/* ── STEP INDICATOR ── */
-.steps {
-  display: flex; align-items: center; justify-content: center;
-  gap: 6px; margin-bottom: 28px;
-}
-.step-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--surface-2); border: 1px solid var(--border-light);
-  transition: all 0.3s;
-}
-.step-dot.active {
-  background: var(--blue);
-  box-shadow: 0 0 8px var(--blue-glow);
-  transform: scale(1.3);
-}
-.step-dot.done {
-  background: var(--green);
-  border-color: var(--green);
-}
-
-/* ── DB URL DISPLAY ── */
-.db-url-box {
-  background: var(--dark-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  font-family: monospace; font-size: 12px;
-  color: var(--accent);
-  word-break: break-all;
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
-/* ── SPINNER ── */
 .spinner {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite;
+  display: inline-block;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── LOADING SCREEN ── */
-#screen-loading {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 16px;
-}
-#screen-loading.active { display: flex; }
-.loading-spinner {
-  width: 40px; height: 40px;
-  border: 3px solid var(--surface-2);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-.loading-text { font-size: 14px; color: var(--text-muted); }
-
-/* ── BACK LINK ── */
-.back-link {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--text-muted);
-  text-decoration: none;
-  margin-bottom: 20px;
-  width: fit-content;
-  transition: color 0.2s;
-}
-.back-link:hover { color: var(--text); }
-.back-link svg { width: 14px; height: 14px; }
-
-/* ── ADMIN DASHBOARD ── */
+/* ══════════════════════════════════════════════════
+   DASHBOARD LAYOUT
+══════════════════════════════════════════════════ */
 #screen-dashboard {
-  max-width: 1100px;
-  display: none; flex-direction: column; gap: 28px;
+  max-width: 100%; width: 100%; padding: 0;
+  align-items: stretch; flex-direction: row;
 }
-#screen-dashboard.active { display: flex; }
 
-/* topbar */
-.admin-topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 28px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+/* Sidebar */
+.adm-sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  background: var(--dark-2); border-right: 1px solid var(--border);
+  height: 100vh; display: flex; flex-direction: column;
+  position: sticky; top: 0; overflow-y: auto;
 }
-.admin-topbar-left { display: flex; align-items: center; gap: 14px; }
-.admin-topbar-logo {
-  width: 38px; height: 38px;
-  background: linear-gradient(135deg, var(--blue), var(--accent));
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 20px var(--blue-glow);
-}
-.admin-topbar-logo svg { width: 18px; height: 18px; color: #fff; }
-.admin-topbar-info h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-.admin-topbar-info p { font-size: 12px; color: var(--text-muted); }
-.admin-badge {
-  background: rgba(239,68,68,0.15);
-  border: 1px solid rgba(239,68,68,0.3);
-  color: #fca5a5;
-  font-size: 11px; font-weight: 600;
-  padding: 3px 10px; border-radius: 20px;
-  letter-spacing: 0.5px; text-transform: uppercase;
-}
-.admin-topbar-right { display: flex; align-items: center; gap: 10px; }
-.topbar-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 14px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-muted);
-  font-size: 13px; font-weight: 500;
-  cursor: pointer; font-family: inherit;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-.topbar-btn:hover { background: var(--surface-3); color: var(--text); }
-.topbar-btn svg { width: 14px; height: 14px; }
-.topbar-btn-danger { color: #fca5a5; border-color: rgba(239,68,68,0.2); }
-.topbar-btn-danger:hover { background: rgba(239,68,68,0.1); color: #fca5a5; }
-
-/* stats grid */
-.stats-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-}
-@media(max-width:800px){ .stats-grid { grid-template-columns: repeat(2,1fr); } }
-
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px 22px;
-  display: flex; flex-direction: column; gap: 8px;
-  position: relative; overflow: hidden;
-}
-.stat-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 2px;
-}
-.stat-card.blue::before { background: var(--blue); }
-.stat-card.cyan::before { background: var(--accent); }
-.stat-card.green::before { background: var(--green); }
-.stat-card.orange::before { background: var(--orange); }
-
-.stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); }
-.stat-value { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
-.stat-value.blue { color: var(--blue-light); }
-.stat-value.cyan { color: var(--accent); }
-.stat-value.green { color: var(--green); }
-.stat-value.orange { color: var(--orange); }
-.stat-sub { font-size: 12px; color: var(--text-faint); }
-
-/* section */
-.section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 14px;
-}
-.section-title {
-  font-size: 15px; font-weight: 700;
-  display: flex; align-items: center; gap: 8px;
-}
-.section-title svg { width: 16px; height: 16px; color: var(--blue-light); }
-
-/* search */
-.search-wrap {
+.adm-sidebar-logo {
   display: flex; align-items: center; gap: 10px;
+  padding: 1.2rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none; color: var(--text);
+  font-weight: 800; font-size: 1rem; letter-spacing: -0.02em;
 }
-.search-input-wrap { position: relative; }
-.search-input-wrap svg {
-  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-  width: 14px; height: 14px; color: var(--text-faint); pointer-events: none;
+.adm-sidebar-logo .logo-icon { width: 28px; height: 28px; border-radius: 8px; }
+.adm-sidebar-badge {
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--red);
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
+  padding: 2px 7px; border-radius: 10px; margin-left: auto;
+}
+.adm-nav { padding: 14px 10px; flex: 1; }
+.adm-nav-section {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-faint);
+  padding: 6px 10px 4px; margin-top: 8px;
+}
+.adm-nav-link {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 8px;
+  color: var(--text-muted); font-size: 13.5px; font-weight: 500;
+  cursor: pointer; border: none; background: none; width: 100%;
+  text-align: left; transition: background 0.15s, color 0.15s;
+}
+.adm-nav-link:hover { background: var(--surface); color: var(--text); }
+.adm-nav-link.active { background: rgba(37,99,235,0.15); color: var(--blue-light); }
+.adm-nav-link svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.8; }
+.adm-sidebar-footer {
+  padding: 14px; border-top: 1px solid var(--border);
+}
+.adm-user-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--radius);
+  background: var(--surface);
+}
+.adm-user-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--red), var(--orange));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.adm-user-info { flex: 1; min-width: 0; }
+.adm-user-email { font-size: 11px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-user-role  { font-size: 10px; color: var(--red); font-weight: 600; }
+.adm-logout-btn {
+  background: none; border: none; color: var(--text-faint);
+  cursor: pointer; padding: 4px; display: flex;
+  align-items: center; border-radius: 6px; transition: color 0.15s;
+}
+.adm-logout-btn:hover { color: var(--red); }
+.adm-logout-btn svg { width: 16px; height: 16px; }
+
+/* Main area */
+.adm-main {
+  flex: 1; display: flex; flex-direction: column;
+  min-width: 0; height: 100vh; overflow: hidden;
+}
+.adm-topbar {
+  height: var(--topbar-h); flex-shrink: 0;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--dark-2);
+}
+.adm-topbar-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; }
+.adm-topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.btn-icon {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 9px;
+  color: var(--text-muted); cursor: pointer; font-size: 13px;
+  font-family: inherit; font-weight: 500;
+  display: flex; align-items: center; gap: 6px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-icon:hover { border-color: var(--border-light); color: var(--text); }
+.btn-icon svg { width: 14px; height: 14px; }
+
+/* Views */
+.adm-content { flex: 1; overflow-y: auto; padding: 24px; }
+.adm-view { display: none; }
+.adm-view.active { display: block; }
+
+/* ── STATS GRID ── */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-bottom: 22px;
+}
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 18px 20px;
+}
+.stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-faint); margin-bottom: 8px; }
+.stat-value { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text); line-height: 1; }
+.stat-sub   { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.stat-card.blue  .stat-value { color: var(--blue-light); }
+.stat-card.green .stat-value { color: var(--green); }
+.stat-card.red   .stat-value { color: var(--red); }
+.stat-card.cyan  .stat-value { color: var(--accent); }
+
+/* ── TABLE CARD ── */
+.table-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.table-card-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.table-card-title { font-size: 14px; font-weight: 700; }
+.table-card-count {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 1px 9px; font-size: 11px; color: var(--text-muted);
 }
 .search-input {
-  background: var(--dark-3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px 8px 32px;
-  color: var(--text);
-  font-family: inherit; font-size: 13px;
-  outline: none; width: 220px;
+  margin-left: auto; background: var(--dark-3); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 13px;
+  font-family: inherit; padding: 7px 12px; outline: none; width: 220px;
   transition: border-color 0.2s;
 }
 .search-input:focus { border-color: var(--blue-light); }
 .search-input::placeholder { color: var(--text-faint); }
 
-.small-btn {
-  display: flex; align-items: center; gap: 5px;
-  padding: 7px 12px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  border-radius: 7px;
-  color: var(--text-muted); font-size: 12px; font-weight: 500;
-  cursor: pointer; font-family: inherit;
-  transition: all 0.2s;
+.adm-table { width: 100%; border-collapse: collapse; }
+.adm-table th {
+  padding: 10px 16px; text-align: left; font-size: 11px;
+  font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text-faint); border-bottom: 1px solid var(--border);
+  background: var(--dark-2);
 }
-.small-btn:hover { background: var(--surface-3); color: var(--text); }
-.small-btn svg { width: 13px; height: 13px; }
-
-/* users table */
-.table-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-table { width: 100%; border-collapse: collapse; }
-thead th {
-  padding: 12px 16px;
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.5px; text-transform: uppercase;
-  color: var(--text-faint);
-  text-align: left;
+.adm-table td {
+  padding: 12px 16px; font-size: 13px; color: var(--text-muted);
   border-bottom: 1px solid var(--border);
-  background: var(--dark-3);
 }
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: var(--surface-2); }
-tbody td {
-  padding: 13px 16px;
-  font-size: 13px;
-  vertical-align: middle;
-}
+.adm-table tr:last-child td { border-bottom: none; }
+.adm-table tr:hover td { background: rgba(255,255,255,0.02); }
 
-/* plan badge */
 .plan-badge {
-  display: inline-flex; align-items: center;
-  padding: 3px 10px; border-radius: 20px;
-  font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.5px;
+  display: inline-block; padding: 2px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
 }
-.plan-badge.free { background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
-.plan-badge.pro { background: rgba(37,99,235,0.2); color: #93c5fd; border: 1px solid rgba(37,99,235,0.3); }
-.plan-badge.business { background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+.plan-badge.free     { background: rgba(100,116,139,0.15); color: #94a3b8; }
+.plan-badge.pro      { background: rgba(37,99,235,0.15);   color: var(--blue-light); }
+.plan-badge.business { background: rgba(16,185,129,0.15);  color: var(--green); }
 
-/* status dot */
 .status-dot {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 12px;
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
 }
-.status-dot::before {
-  content: ''; width: 6px; height: 6px; border-radius: 50%;
-  background: currentColor;
-}
-.status-dot.active { color: var(--green); }
-.status-dot.expired { color: var(--red); }
-.status-dot.blocked { color: var(--orange); }
+.status-dot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+.status-dot.active  { color: var(--green);  } .status-dot.active::before  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-dot.expired { color: var(--orange); } .status-dot.expired::before { background: var(--orange); }
+.status-dot.blocked { color: var(--red);    } .status-dot.blocked::before { background: var(--red); }
 
-/* storage mini bar */
-.mini-storage {
-  display: flex; flex-direction: column; gap: 4px;
-}
-.mini-storage-bar {
-  height: 4px; background: var(--surface-3);
-  border-radius: 2px; overflow: hidden; width: 80px;
-}
-.mini-storage-fill {
-  height: 100%; border-radius: 2px;
-  background: var(--blue);
-  transition: width 0.3s;
-}
-.mini-storage-fill.warn { background: var(--orange); }
-.mini-storage-fill.full { background: var(--red); }
+.mini-bar-wrap { display: flex; flex-direction: column; gap: 3px; }
+.mini-bar { height: 4px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.mini-bar-fill { height: 100%; border-radius: 3px; background: var(--blue); transition: width 0.3s; }
+.mini-bar-fill.warn { background: var(--orange); }
+.mini-bar-fill.full { background: var(--red); }
 
-/* row actions */
 .row-actions { display: flex; gap: 6px; }
 .action-btn {
-  padding: 5px 10px;
-  border-radius: 6px; border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-muted); font-size: 12px; font-weight: 500;
-  cursor: pointer; font-family: inherit;
-  display: flex; align-items: center; gap: 4px;
-  transition: all 0.2s;
+  display: flex; align-items: center; gap: 5px; padding: 5px 10px;
+  border-radius: 7px; font-size: 12px; font-weight: 600; font-family: inherit;
+  cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
 }
-.action-btn:hover { background: var(--surface-2); color: var(--text); }
-.action-btn.edit:hover { border-color: var(--blue); color: var(--blue-light); }
-.action-btn.danger:hover { border-color: rgba(239,68,68,0.4); color: #fca5a5; background: rgba(239,68,68,0.08); }
-.action-btn svg { width: 12px; height: 12px; }
+.action-btn.edit   { background: rgba(37,99,235,0.1); color: var(--blue-light); border-color: rgba(37,99,235,0.2); }
+.action-btn.edit:hover { background: rgba(37,99,235,0.2); }
+.action-btn.danger { background: rgba(239,68,68,0.1); color: var(--red); border-color: rgba(239,68,68,0.2); }
+.action-btn.danger:hover { background: rgba(239,68,68,0.2); }
+.action-btn.success { background: rgba(16,185,129,0.1); color: var(--green); border-color: rgba(16,185,129,0.2); }
+.action-btn.success:hover { background: rgba(16,185,129,0.2); }
+.action-btn svg { width: 13px; height: 13px; }
 
-/* ── MODAL ── */
+/* ── CONFIG GLOBAL ── */
+.config-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+}
+.config-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.config-card-header {
+  padding: 14px 18px 12px; border-bottom: 1px solid var(--border);
+  background: var(--dark-2);
+}
+.config-card-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.config-card-sub   { font-size: 11px; color: var(--text-faint); }
+.config-card-body  { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+
+.cfg-field label {
+  display: block; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-muted); margin-bottom: 5px;
+}
+.cfg-input {
+  width: 100%; background: var(--dark-3); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-size: 13px;
+  font-family: inherit; padding: 8px 12px; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.cfg-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+.cfg-input[readonly] { color: var(--text-muted); cursor: default; }
+
+.cfg-row { display: flex; gap: 10px; }
+.cfg-row .cfg-field { flex: 1; }
+
+.save-btn {
+  padding: 9px 18px; background: var(--blue); border: none;
+  border-radius: var(--radius); color: #fff; font-size: 13px;
+  font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: background 0.15s; align-self: flex-start;
+  display: flex; align-items: center; gap: 7px;
+}
+.save-btn:hover { background: var(--blue-light); }
+.save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.save-btn.green { background: var(--green); }
+.save-btn.green:hover { background: #0ea471; }
+
+/* Global variables display */
+.var-list {
+  background: var(--dark-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px;
+  font-family: 'Courier New', monospace; font-size: 11.5px;
+  line-height: 1.9;
+}
+.var-item { display: flex; gap: 8px; }
+.var-key   { color: var(--accent); font-weight: 700; }
+.var-val   { color: var(--text-muted); }
+.var-val.num { color: var(--orange); }
+.var-val.str { color: #86efac; }
+
+/* Plan edit cards */
+.plans-edit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.plan-edit-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.plan-edit-header {
+  padding: 12px 16px; display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.plan-edit-dot { width: 8px; height: 8px; border-radius: 50%; }
+.plan-edit-name { font-size: 13px; font-weight: 700; }
+.plan-edit-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Key banner */
+.key-banner {
+  background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2);
+  border-radius: var(--radius); padding: 10px 14px; font-size: 12px;
+  color: var(--green); display: flex; align-items: center; gap: 8px;
+  margin-bottom: 16px;
+}
+.key-banner svg { width: 14px; height: 14px; flex-shrink: 0; }
+.key-banner code { font-family: monospace; color: #86efac; word-break: break-all; }
+
+/* ── MODALS ── */
 .modal-overlay {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px);
-  display: none; align-items: center; justify-content: center;
-  padding: 20px;
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; padding: 20px;
 }
 .modal-overlay.show { display: flex; }
 .modal {
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  width: 100%; max-width: 440px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-  position: relative;
+  background: var(--surface); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 24px; width: 100%; max-width: 500px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
 }
-.modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 22px;
-}
-.modal-title { font-size: 17px; font-weight: 700; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-title { font-size: 1rem; font-weight: 700; }
 .modal-close {
-  width: 30px; height: 30px; border-radius: 7px;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text-muted); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  padding: 4px; border-radius: 6px; display: flex; transition: color 0.15s;
 }
-.modal-close:hover { background: var(--surface-3); color: var(--text); }
-.modal-close svg { width: 14px; height: 14px; }
-
-.modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.modal-field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
-.modal-field select, .modal-field input {
-  background: var(--dark-3);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  color: var(--text);
-  font-family: inherit; font-size: 13px;
-  outline: none;
+.modal-close:hover { color: var(--text); }
+.modal-close svg { width: 18px; height: 18px; }
+.modal-body { display: flex; flex-direction: column; gap: 12px; }
+.modal-field label {
+  display: block; font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 5px;
+}
+.modal-input, .modal-select {
+  width: 100%; background: var(--dark-3); border: 1px solid var(--border-light);
+  border-radius: var(--radius); color: var(--text); font-size: 13.5px;
+  font-family: inherit; padding: 9px 12px; outline: none;
   transition: border-color 0.2s;
 }
-.modal-field select option { background: var(--dark-3); }
-.modal-field select:focus, .modal-field input:focus { border-color: var(--blue-light); }
-.modal-actions { display: flex; gap: 10px; margin-top: 22px; }
-.modal-btn {
-  flex: 1; padding: 11px;
-  border-radius: var(--radius); border: none;
-  font-family: inherit; font-size: 13px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s;
-}
-.modal-btn-cancel { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
-.modal-btn-cancel:hover { background: var(--surface-3); }
-.modal-btn-save { background: var(--blue); color: #fff; }
-.modal-btn-save:hover { background: var(--blue-light); }
-.modal-btn-danger { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
-.modal-btn-danger:hover { background: rgba(239,68,68,0.25); }
-
-/* user detail in modal */
-.modal-user-info {
+.modal-select { cursor: pointer; }
+.modal-input:focus, .modal-select:focus { border-color: var(--blue); }
+.modal-user-header {
   display: flex; align-items: center; gap: 12px;
-  padding: 12px; background: var(--dark-3);
-  border-radius: var(--radius); margin-bottom: 20px;
+  padding: 12px 14px; background: var(--dark-2);
+  border-radius: var(--radius); margin-bottom: 4px;
 }
 .modal-avatar {
   width: 38px; height: 38px; border-radius: 50%;
   background: linear-gradient(135deg, var(--blue), var(--accent));
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 700; color: #fff;
-  flex-shrink: 0;
+  font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0;
 }
-.modal-user-email { font-size: 13px; font-weight: 500; }
-.modal-user-uid { font-size: 11px; color: var(--text-faint); font-family: monospace; }
+.modal-user-email { font-size: 13.5px; font-weight: 600; }
+.modal-user-uid   { font-size: 10.5px; color: var(--text-faint); font-family: monospace; margin-top: 2px; }
+.modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.modal-btn {
+  padding: 9px 20px; border-radius: var(--radius); font-size: 13.5px;
+  font-weight: 600; font-family: inherit; cursor: pointer; border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.modal-btn-cancel { background: var(--surface-2); color: var(--text-muted); }
+.modal-btn-cancel:hover { color: var(--text); }
+.modal-btn-save   { background: var(--blue); color: #fff; border-color: var(--blue); }
+.modal-btn-save:hover { background: var(--blue-light); }
+.modal-btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border-color: rgba(239,68,68,0.3); }
+.modal-btn-danger:hover { background: rgba(239,68,68,0.25); }
+.modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* toast */
-.toast-container {
-  position: fixed; top: 20px; right: 20px; z-index: 9999;
-  display: flex; flex-direction: column; gap: 10px;
-}
+/* ── TOASTS ── */
+#toastContainer { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
 .toast {
-  padding: 12px 18px;
-  border-radius: var(--radius);
-  font-size: 13px; font-weight: 500;
+  padding: 10px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
   display: flex; align-items: center; gap: 8px;
-  max-width: 320px;
-  animation: toastIn 0.3s ease;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  animation: slideUp 0.25s ease; pointer-events: auto;
 }
-.toast svg { width: 15px; height: 15px; flex-shrink: 0; }
-.toast-success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.35); color: #6ee7b7; }
-.toast-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.35); color: #fca5a5; }
-@keyframes toastIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform: translateX(0); } }
+.toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+.toast-success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--green); }
+.toast-error   { background: rgba(239,68,68,0.15);  border: 1px solid rgba(239,68,68,0.3);  color: #fca5a5; }
+.toast-info    { background: rgba(37,99,235,0.15);  border: 1px solid rgba(37,99,235,0.3);  color: var(--blue-light); }
+@keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 
-/* responsive */
-@media(max-width:900px){
-  #screen-dashboard { max-width: 100%; }
-  .stats-grid { grid-template-columns: repeat(2,1fr); }
-  table { display: block; overflow-x: auto; white-space: nowrap; }
+@media (max-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .config-grid, .plans-edit-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
-<!-- Toast container -->
-<div class="toast-container" id="toastContainer"></div>
+<div id="toastContainer"></div>
 
-<!-- SCREEN: Loading -->
-<div id="screen-loading" class="screen active">
-  <div class="loading-spinner"></div>
-  <div class="loading-text">Verificando sesion...</div>
-</div>
-
-<!-- SCREEN: Login -->
-<div id="screen-login" class="screen">
+<!-- ══════════════════════════════════════════════
+     SCREEN: LOGIN
+══════════════════════════════════════════════ -->
+<div class="screen active" id="screen-login">
   <div class="logo-wrap">
     <div class="logo-icon">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
       </svg>
     </div>
     <div class="logo-name">NetOrbe Cloud</div>
-    <div class="logo-badge">Portal Administrador</div>
+    <div class="logo-badge">Panel Admin</div>
   </div>
 
   <div class="card">
-    <h2 class="card-title">Acceso restringido</h2>
-    <p class="card-sub">Este portal es exclusivo para administradores del sistema. Inicia sesion con la cuenta autorizada.</p>
-
-    <div id="loginAlert" class="alert alert-error">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-      <span id="loginAlertMsg"></span>
-    </div>
+    <div class="card-title">Acceso de administrador</div>
+    <div class="card-sub">Solo cuentas autorizadas pueden acceder a este panel.</div>
 
     <div class="field">
-      <label>Correo electronico</label>
+      <label>Correo electrónico</label>
       <div class="input-wrap">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-        </svg>
-        <input type="email" id="loginEmail" placeholder="admin@ejemplo.com" autocomplete="email">
+        <input type="email" id="loginEmail" placeholder="admin@ejemplo.com" autocomplete="username">
       </div>
     </div>
-
-    <div class="field" style="margin-bottom: 24px;">
-      <label>Contrasena</label>
+    <div class="field">
+      <label>Contraseña</label>
       <div class="input-wrap">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/>
-        </svg>
-        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
-        <button class="toggle-pw" type="button" onclick="togglePw('loginPassword', this)" aria-label="Mostrar contrasena">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
-          </svg>
+        <input type="password" id="loginPassword" placeholder="••••••••••" autocomplete="current-password">
+        <button class="pw-toggle" onclick="togglePw('loginPassword',this)" type="button">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
         </button>
       </div>
     </div>
 
-    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-      </svg>
-      Iniciar sesion
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+      Iniciar sesión
     </button>
+    <div class="alert" id="loginAlert"><span id="loginAlertMsg"></span></div>
   </div>
 </div>
 
-<!-- SCREEN: DB Key input -->
-<div id="screen-key" class="screen">
+<!-- ══════════════════════════════════════════════
+     SCREEN: DB SECRET KEY
+══════════════════════════════════════════════ -->
+<div class="screen" id="screen-key">
   <div class="logo-wrap">
     <div class="logo-icon">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
       </svg>
     </div>
     <div class="logo-name">NetOrbe Cloud</div>
-    <div class="logo-badge">Verificacion de acceso</div>
-  </div>
-
-  <div class="steps">
-    <div class="step-dot done"></div>
-    <div class="step-dot active"></div>
-    <div class="step-dot"></div>
+    <div class="logo-badge">Autenticación DB</div>
   </div>
 
   <div class="card">
-    <h2 class="card-title">Clave secreta de base de datos</h2>
-    <p class="card-sub">Para acceder al panel necesitas la clave secreta de Firebase. Esta se usa para autenticar solicitudes directas a la base de datos.</p>
-
-    <div class="hint">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-      <span>La clave se envia como: <code style="color:var(--accent);">tudb.firebaseio.com/.json?auth=<b>CLAVE</b></code></span>
-    </div>
-
-    <div id="keyAlert" class="alert alert-error">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-      <span id="keyAlertMsg"></span>
+    <div class="card-title">Clave secreta de base de datos</div>
+    <div class="card-sub">
+      Ingresa la URL de Firebase Realtime Database y la clave secreta (Database Secret).<br>
+      La verificación se hace con: <code style="font-family:monospace;color:var(--accent);font-size:11px;">DB_URL/.json?auth=CLAVE</code>
     </div>
 
     <div class="field">
       <label>URL de la base de datos</label>
       <div class="input-wrap">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-        </svg>
-        <input type="text" id="dbUrl" placeholder="https://tu-proyecto.firebaseio.com" autocomplete="off">
+        <input type="url" id="dbUrl" placeholder="https://proyecto-default-rtdb.firebaseio.com" autocomplete="off">
       </div>
     </div>
-
-    <div class="field" style="margin-bottom:10px;">
-      <label>Clave secreta de base de datos</label>
+    <div class="field">
+      <label>Clave secreta (Database Secret)</label>
       <div class="input-wrap">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-        </svg>
-        <input type="password" id="dbSecret" placeholder="Pega aqui la clave secreta..." autocomplete="off">
-        <button class="toggle-pw" type="button" onclick="togglePw('dbSecret', this)" aria-label="Mostrar clave">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
-          </svg>
+        <input type="password" id="dbSecret" placeholder="Tu clave secreta de Firebase..." autocomplete="off">
+        <button class="pw-toggle" onclick="togglePw('dbSecret',this)" type="button">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
         </button>
       </div>
     </div>
 
-    <div id="previewUrl" class="db-url-box" style="display:none;"></div>
+    <div class="preview-url" id="previewUrl"></div>
 
-    <button class="btn btn-primary" id="keyBtn" onclick="verifyKey()" style="margin-top:14px;">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-      </svg>
+    <button class="btn-primary" id="keyBtn" onclick="verifyKey()" style="margin-top:10px;">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
       Verificar y acceder
     </button>
-    <button class="btn btn-ghost" onclick="doLogout()">Cancelar y cerrar sesion</button>
+    <div class="alert" id="keyAlert"><span id="keyAlertMsg"></span></div>
+  </div>
+
+  <div style="text-align:center;margin-top:14px;">
+    <button onclick="doLogout()" style="background:none;border:none;color:var(--text-faint);font-size:12px;cursor:pointer;font-family:inherit;">
+      Cerrar sesion y volver al login
+    </button>
   </div>
 </div>
 
-<!-- SCREEN: Dashboard -->
-<div id="screen-dashboard" class="screen">
+<!-- ══════════════════════════════════════════════
+     SCREEN: DASHBOARD
+══════════════════════════════════════════════ -->
+<div class="screen" id="screen-dashboard">
 
-  <!-- Topbar -->
-  <div class="admin-topbar">
-    <div class="admin-topbar-left">
-      <div class="admin-topbar-logo">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+  <!-- SIDEBAR -->
+  <aside class="adm-sidebar">
+    <div class="adm-sidebar-logo">
+      <div class="logo-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="14" height="14" color="#fff">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
         </svg>
       </div>
-      <div class="admin-topbar-info">
-        <h1>NetOrbe Cloud — Admin</h1>
-        <p id="topbarEmail">Cargando...</p>
-      </div>
-      <span class="admin-badge">Admin</span>
+      NetOrbe Cloud
+      <span class="adm-sidebar-badge">Admin</span>
     </div>
-    <div class="admin-topbar-right">
-      <a href="app.html" class="topbar-btn">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-        Ir al panel
-      </a>
-      <button class="topbar-btn" onclick="refreshData()">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-        Actualizar
-      </button>
-      <button class="topbar-btn topbar-btn-danger" onclick="doLogout()">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-        Cerrar sesion
-      </button>
-    </div>
-  </div>
 
-  <!-- Stats -->
-  <div class="stats-grid">
-    <div class="stat-card blue">
-      <div class="stat-label">Total usuarios</div>
-      <div class="stat-value blue" id="statTotalUsers">—</div>
-      <div class="stat-sub">Registrados</div>
-    </div>
-    <div class="stat-card green">
-      <div class="stat-label">Planes activos</div>
-      <div class="stat-value green" id="statActivePlans">—</div>
-      <div class="stat-sub">No vencidos</div>
-    </div>
-    <div class="stat-card orange">
-      <div class="stat-label">Planes vencidos</div>
-      <div class="stat-value orange" id="statExpired">—</div>
-      <div class="stat-sub">Sin acceso</div>
-    </div>
-    <div class="stat-card cyan">
-      <div class="stat-label">Almacenamiento</div>
-      <div class="stat-value cyan" id="statStorage">—</div>
-      <div class="stat-sub">Uso total</div>
-    </div>
-  </div>
+    <nav class="adm-nav">
+      <div class="adm-nav-section">Principal</div>
+      <button class="adm-nav-link active" onclick="goTo('overview')" id="nav-overview">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Resumen
+      </button>
 
-  <!-- Users table -->
-  <div>
-    <div class="section-header">
-      <div class="section-title">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      <div class="adm-nav-section">Gestión</div>
+      <button class="adm-nav-link" onclick="goTo('users')" id="nav-users">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         Usuarios
-      </div>
-      <div class="search-wrap">
-        <div class="search-input-wrap">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" class="search-input" id="searchInput" placeholder="Buscar por email o UID..." oninput="filterUsers()">
+        <span id="sidebarUserCount" style="margin-left:auto;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:0 7px;font-size:10px;color:var(--text-muted);">0</span>
+      </button>
+
+      <div class="adm-nav-section">Configuración</div>
+      <button class="adm-nav-link" onclick="goTo('config')" id="nav-config">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        Config Global
+      </button>
+      <button class="adm-nav-link" onclick="goTo('plans')" id="nav-plans">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Planes
+      </button>
+      <button class="adm-nav-link" onclick="goTo('security')" id="nav-security">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        Seguridad
+      </button>
+    </nav>
+
+    <div class="adm-sidebar-footer">
+      <div class="adm-user-row">
+        <div class="adm-user-avatar" id="sidebarAvatar">A</div>
+        <div class="adm-user-info">
+          <div class="adm-user-email" id="sidebarEmail">—</div>
+          <div class="adm-user-role">Administrador</div>
         </div>
-        <button class="small-btn" onclick="refreshData()">
+        <button class="adm-logout-btn" onclick="doLogout()" title="Cerrar sesión">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="adm-main">
+    <header class="adm-topbar">
+      <div class="adm-topbar-title" id="topbarTitle">Resumen</div>
+      <div class="adm-topbar-actions">
+        <button class="btn-icon" onclick="refreshAll()">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           Actualizar
         </button>
       </div>
-    </div>
+    </header>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Usuario</th>
-            <th>Plan</th>
-            <th>Estado</th>
-            <th>Vencimiento</th>
-            <th>Almacenamiento</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="usersTableBody">
-          <tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text-faint);">Cargando usuarios...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <div class="adm-content">
 
-</div>
+      <!-- ── VIEW: OVERVIEW ── -->
+      <div class="adm-view active" id="view-overview">
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-label">Total usuarios</div>
+            <div class="stat-value" id="statTotal">—</div>
+            <div class="stat-sub">Registrados</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Planes activos</div>
+            <div class="stat-value" id="statActive">—</div>
+            <div class="stat-sub">Sin vencer</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-label">Vencidos</div>
+            <div class="stat-value" id="statExpired">—</div>
+            <div class="stat-sub">Requieren renovación</div>
+          </div>
+          <div class="stat-card cyan">
+            <div class="stat-label">Almacenamiento</div>
+            <div class="stat-value" id="statStorage">—</div>
+            <div class="stat-sub">Total usado</div>
+          </div>
+        </div>
 
-<!-- MODAL: Edit user -->
+        <!-- Recent users preview -->
+        <div class="table-card">
+          <div class="table-card-header">
+            <div class="table-card-title">Usuarios recientes</div>
+            <button class="btn-icon" onclick="goTo('users')" style="margin-left:auto;">Ver todos</button>
+          </div>
+          <table class="adm-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Plan</th>
+                <th>Estado</th>
+                <th>Almacenamiento</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="overviewTableBody">
+              <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-faint);">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── VIEW: USERS ── -->
+      <div class="adm-view" id="view-users">
+        <div class="table-card">
+          <div class="table-card-header">
+            <div class="table-card-title">Todos los usuarios</div>
+            <span class="table-card-count" id="usersCountBadge">0</span>
+            <input class="search-input" id="searchInput" placeholder="Buscar por correo o UID..." oninput="filterUsers()">
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="adm-table" style="min-width:750px;">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Plan</th>
+                  <th>Estado</th>
+                  <th>Vencimiento</th>
+                  <th>Almacenamiento</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-faint);">Cargando usuarios...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: CONFIG GLOBAL ── -->
+      <div class="adm-view" id="view-config">
+
+        <!-- Key info banner -->
+        <div class="key-banner">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          DB conectada: <code id="cfgDbUrlDisplay">—</code>
+        </div>
+
+        <div class="config-grid">
+
+          <!-- Worker & Admin -->
+          <div class="config-card">
+            <div class="config-card-header">
+              <div class="config-card-title">Worker & Acceso</div>
+              <div class="config-card-sub">URL del worker de subida y correo admin</div>
+            </div>
+            <div class="config-card-body">
+              <div class="cfg-field">
+                <label>Worker URL</label>
+                <input class="cfg-input" id="cfgWorkerUrl" placeholder="https://upload.apis.netorbe.lat">
+              </div>
+              <div class="cfg-field">
+                <label>Correo de administrador</label>
+                <input class="cfg-input" id="cfgAdminEmail" placeholder="admin@correo.com">
+              </div>
+              <div class="cfg-field">
+                <label>URL pública de archivos</label>
+                <input class="cfg-input" id="cfgFilesUrl" placeholder="https://usc.stgnetorbe.lat">
+              </div>
+              <button class="save-btn" onclick="saveConfig('access')">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Guardar cambios
+              </button>
+            </div>
+          </div>
+
+          <!-- Variables globales actuales -->
+          <div class="config-card">
+            <div class="config-card-header">
+              <div class="config-card-title">Variables globales actuales</div>
+              <div class="config-card-sub">Valores en tiempo real de la base de datos</div>
+            </div>
+            <div class="config-card-body">
+              <div class="var-list" id="globalVarsList">Cargando...</div>
+              <button class="save-btn" onclick="loadConfig()" style="background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border);">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Refrescar
+              </button>
+            </div>
+          </div>
+
+          <!-- Límites por defecto -->
+          <div class="config-card">
+            <div class="config-card-header">
+              <div class="config-card-title">Límites globales por defecto</div>
+              <div class="config-card-sub">Valores base antes de aplicar el plan del usuario</div>
+            </div>
+            <div class="config-card-body">
+              <div class="cfg-row">
+                <div class="cfg-field">
+                  <label>Free storage (MB)</label>
+                  <input class="cfg-input" type="number" id="cfgFreeStorage" placeholder="1024">
+                </div>
+                <div class="cfg-field">
+                  <label>Free max file (MB)</label>
+                  <input class="cfg-input" type="number" id="cfgFreeMaxFile" placeholder="50">
+                </div>
+              </div>
+              <div class="cfg-row">
+                <div class="cfg-field">
+                  <label>Free max archivos</label>
+                  <input class="cfg-input" type="number" id="cfgFreeMaxFiles" placeholder="50">
+                </div>
+                <div class="cfg-field">
+                  <label>Max nombre (chars)</label>
+                  <input class="cfg-input" type="number" id="cfgMaxFilenameLen" placeholder="255">
+                </div>
+              </div>
+              <div class="cfg-row">
+                <div class="cfg-field">
+                  <label>Anti-replay window (min)</label>
+                  <input class="cfg-input" type="number" id="cfgReplayWindow" placeholder="5">
+                </div>
+                <div class="cfg-field">
+                  <label>Timeout fetch (seg)</label>
+                  <input class="cfg-input" type="number" id="cfgFetchTimeout" placeholder="8">
+                </div>
+              </div>
+              <button class="save-btn" onclick="saveConfig('limits')">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Guardar límites
+              </button>
+            </div>
+          </div>
+
+          <!-- Clave DB info -->
+          <div class="config-card">
+            <div class="config-card-header">
+              <div class="config-card-title">Sesión admin</div>
+              <div class="config-card-sub">Clave guardada en localStorage del navegador</div>
+            </div>
+            <div class="config-card-body">
+              <div class="cfg-field">
+                <label>URL en uso</label>
+                <input class="cfg-input" id="cfgSessionUrl" readonly>
+              </div>
+              <div class="cfg-field">
+                <label>Clave guardada (oculta)</label>
+                <input class="cfg-input" value="••••••••••••••••••••••••" readonly>
+              </div>
+              <div style="display:flex;gap:10px;">
+                <button class="save-btn" onclick="clearKey()" style="background:rgba(239,68,68,0.15);color:var(--red);">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Borrar clave guardada
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── VIEW: PLANES ── -->
+      <div class="adm-view" id="view-plans">
+        <div class="plans-edit-grid" id="plansEditGrid">
+          <!-- rendered by JS -->
+        </div>
+
+        <div class="config-card">
+          <div class="config-card-header">
+            <div class="config-card-title">Guardar planes en base de datos</div>
+            <div class="config-card-sub">Los valores editados arriba se escribirán en config/plans de Firebase</div>
+          </div>
+          <div class="config-card-body" style="flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.6;max-width:500px;">
+              Al guardar, <code style="font-family:monospace;color:var(--accent);">app.html</code> leerá estos valores al iniciar.
+              Los cambios aplican a nuevos registros y al recargar la sesión del usuario.
+            </div>
+            <button class="save-btn green" onclick="savePlans()">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              Guardar todos los planes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: SECURITY ── -->
+      <div class="adm-view" id="view-security">
+        <div class="config-grid">
+
+          <div class="config-card">
+            <div class="config-card-header">
+              <div class="config-card-title">Resumen de seguridad</div>
+              <div class="config-card-sub">Estado actual del sistema</div>
+            </div>
+            <div class="config-card-body">
+              <div class="var-list" id="securityStatus">Cargando...</div>
+            </div>
+          </div>
+
+          <div class="config-card">
+            <div class="config-card-header">
+              <div class="config-card-title">Usuarios bloqueados</div>
+              <div class="config-card-sub">Cuentas con acceso restringido</div>
+            </div>
+            <div class="config-card-body">
+              <div id="blockedList" style="display:flex;flex-direction:column;gap:8px;">
+                <div style="color:var(--text-faint);font-size:13px;">Cargando...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="config-card">
+            <div class="config-card-header">
+              <div class="config-card-title">Planes vencidos</div>
+              <div class="config-card-sub">Usuarios que requieren renovación</div>
+            </div>
+            <div class="config-card-body">
+              <div id="expiredList" style="display:flex;flex-direction:column;gap:8px;">
+                <div style="color:var(--text-faint);font-size:13px;">Cargando...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="config-card">
+            <div class="config-card-header">
+              <div class="config-card-title">Almacenamiento alto (&gt;90%)</div>
+              <div class="config-card-sub">Usuarios cerca del límite</div>
+            </div>
+            <div class="config-card-body">
+              <div id="highStorageList" style="display:flex;flex-direction:column;gap:8px;">
+                <div style="color:var(--text-faint);font-size:13px;">Cargando...</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /adm-content -->
+  </main>
+</div><!-- /screen-dashboard -->
+
+<!-- ══════════════════════════════════════════════
+     MODAL: Editar usuario
+══════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modalEdit">
   <div class="modal">
     <div class="modal-header">
@@ -863,42 +985,50 @@ tbody td {
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-
-    <div class="modal-user-info">
+    <div class="modal-user-header">
       <div class="modal-avatar" id="editAvatar">?</div>
       <div>
-        <div class="modal-user-email" id="editEmail"></div>
-        <div class="modal-user-uid" id="editUid"></div>
+        <div class="modal-user-email" id="editEmail">—</div>
+        <div class="modal-user-uid" id="editUid">—</div>
       </div>
     </div>
-
-    <div class="modal-field">
-      <label>Plan</label>
-      <select id="editPlan">
-        <option value="free">Gratuito — 500 MB</option>
-        <option value="pro">Pro — 10 GB</option>
-        <option value="business">Business — 100 GB</option>
-      </select>
+    <div class="modal-body" style="margin-top:14px;">
+      <div class="modal-row">
+        <div class="modal-field">
+          <label>Plan</label>
+          <select class="modal-select" id="editPlan">
+            <option value="free">Gratuito</option>
+            <option value="pro">Pro</option>
+            <option value="business">Business</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Estado</label>
+          <select class="modal-select" id="editBlocked">
+            <option value="false">Activo</option>
+            <option value="true">Bloqueado</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label>Límite almacenamiento (MB)</label>
+          <input class="modal-input" type="number" id="editStorageLimit" min="1">
+        </div>
+        <div class="modal-field">
+          <label>Fecha de vencimiento</label>
+          <input class="modal-input" type="date" id="editExpiry">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Max tamaño por archivo (MB)</label>
+        <input class="modal-input" type="number" id="editMaxFileMB" min="1">
+      </div>
+      <div class="modal-field">
+        <label>Max archivos (0 = ilimitado)</label>
+        <input class="modal-input" type="number" id="editMaxFiles" min="0">
+      </div>
     </div>
-
-    <div class="modal-field">
-      <label>Fecha de vencimiento</label>
-      <input type="date" id="editExpiry">
-    </div>
-
-    <div class="modal-field">
-      <label>Limite de almacenamiento (MB)</label>
-      <input type="number" id="editStorageLimit" min="1" step="1" placeholder="512">
-    </div>
-
-    <div class="modal-field">
-      <label>Estado</label>
-      <select id="editBlocked">
-        <option value="false">Activo</option>
-        <option value="true">Bloqueado</option>
-      </select>
-    </div>
-
     <div class="modal-actions">
       <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalEdit')">Cancelar</button>
       <button class="modal-btn modal-btn-save" id="saveEditBtn" onclick="saveUserEdit()">Guardar cambios</button>
@@ -906,85 +1036,129 @@ tbody td {
   </div>
 </div>
 
-<!-- MODAL: Confirm delete -->
-<div class="modal-overlay" id="modalDelete">
-  <div class="modal" style="max-width:380px;">
+<!-- ══════════════════════════════════════════════
+     MODAL: Confirmar acción
+══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal" style="max-width:400px;">
     <div class="modal-header">
-      <h3 class="modal-title" style="color:var(--red);">Confirmar accion</h3>
-      <button class="modal-close" onclick="closeModal('modalDelete')">
+      <h3 class="modal-title" id="confirmTitle">Confirmar</h3>
+      <button class="modal-close" onclick="closeModal('modalConfirm')">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <p id="deleteMsg" style="font-size:14px; color:var(--text-muted); line-height:1.6; margin-bottom:22px;"></p>
+    <p id="confirmMsg" style="font-size:13.5px;color:var(--text-muted);line-height:1.6;margin-bottom:22px;"></p>
     <div class="modal-actions">
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalDelete')">Cancelar</button>
-      <button class="modal-btn modal-btn-danger" id="confirmDeleteBtn">Confirmar</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalConfirm')">Cancelar</button>
+      <button class="modal-btn modal-btn-danger" id="confirmActionBtn">Confirmar</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── FIREBASE CONFIG ──────────────────────────────────────────────────────────
-// REEMPLAZA con tu configuracion real de Firebase
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBV7Y4MpYriQoJwIJ3h12H_V2OcYNO9yDs",
-  authDomain: "netorbegroup.firebaseapp.com",
-  databaseURL: "https://netorbegroup-default-rtdb.firebaseio.com",
-  projectId: "netorbegroup",
-  storageBucket: "netorbegroup.firebasestorage.app",
-  messagingSenderId: "105267221348",
-  appId: "1:105267221348:web:2b89cb2d17bda971306071"
+"use strict";
+
+// ════════════════════════════════════════════════════════════════════════
+// ── GLOBAL VARIABLES ── Fuente de verdad sincronizada con app.html
+// Estos valores se leen de config/ en Firebase al iniciar.
+// Al guardar desde Config Global, app.html los lee en su próxima carga.
+// ════════════════════════════════════════════════════════════════════════
+const GLOBAL = {
+  // Credenciales Firebase (solo se usan en admin para auth)
+  FIREBASE_CONFIG: {
+    apiKey:            "AIzaSyBV7Y4MpYriQoJwIJ3h12H_V2OcYNO9yDs",
+    authDomain:        "netorbegroup.firebaseapp.com",
+    databaseURL:       "https://netorbegroup-default-rtdb.firebaseio.com",
+    projectId:         "netorbegroup",
+    storageBucket:     "netorbegroup.firebasestorage.app",
+    messagingSenderId: "105267221348",
+    appId:             "1:105267221348:web:2b89cb2d17bda971306071"
+  },
+
+  // Correo admin autorizado (se verifica localmente ANTES de llamar Firebase)
+  ADMIN_EMAIL: "netorbewebhosting@gmail.com",
+
+  // URL del Cloudflare Worker
+  WORKER_URL: "https://upload.apis.netorbe.lat",
+
+  // URL base de archivos subidos
+  FILES_BASE_URL: "https://usc.stgnetorbe.lat",
+
+  // Planes — deben coincidir con app.html PLANS
+  // storageMB   : límite total de almacenamiento en MB
+  // maxFileMB   : tamaño máximo por archivo en MB
+  // maxFiles    : 0 = ilimitado
+  PLANS: {
+    free: {
+      name: "Gratuito", storageMB: 1024,   maxFileMB: 50,    maxFiles: 50,
+      price: "$0",  period: "mes", color: "#64748b",
+      features: ["1 GB de almacenamiento", "Archivos hasta 50 MB", "50 archivos máximo"]
+    },
+    pro: {
+      name: "Pro",      storageMB: 51200,  maxFileMB: 2048,  maxFiles: 0,
+      price: "$5",  period: "mes", color: "#2563eb",
+      features: ["50 GB de almacenamiento", "Archivos hasta 2 GB", "Archivos ilimitados", "Soporte prioritario"]
+    },
+    business: {
+      name: "Business", storageMB: 512000, maxFileMB: 10240, maxFiles: 0,
+      price: "$20", period: "mes", color: "#10b981",
+      features: ["500 GB de almacenamiento", "Archivos hasta 10 GB", "Archivos ilimitados", "Soporte prioritario", "Compartir archivos"]
+    }
+  },
+
+  // Límites globales (usados por el Worker y la app como fallback)
+  FREE_STORAGE_MB:   1024,   // MB de storage por defecto en plan free
+  FREE_MAX_FILE_MB:  50,     // MB máx por archivo en free
+  FREE_MAX_FILES:    50,     // archivos max en free
+  MAX_FILENAME_LEN:  255,    // caracteres máximos en nombre de archivo
+  REPLAY_WINDOW_MIN: 5,      // ventana anti-replay en minutos
+  FETCH_TIMEOUT_SEC: 8       // timeout para fetch en segundos
 };
 
-// ── ADMIN EMAIL AUTORIZADO ───────────────────────────────────────────────────
-const ADMIN_EMAIL = "netorbewebhosting@gmail.com";
-
-// ── PLAN CONFIGS ─────────────────────────────────────────────────────────────
-const PLAN_LIMITS = { free: 500, pro: 10240, business: 102400 };
-
-// ── STATE ────────────────────────────────────────────────────────────────────
-let db_url   = "";
+// ── ESTADO RUNTIME ──────────────────────────────────────────────────────
+let db_url    = "";
 let db_secret = "";
 let allUsers  = [];
 let editingUid = null;
+let currentView = "overview";
 
-// ── FIREBASE INIT ────────────────────────────────────────────────────────────
-firebase.initializeApp(FIREBASE_CONFIG);
+// ── FIREBASE ─────────────────────────────────────────────────────────────
+firebase.initializeApp(GLOBAL.FIREBASE_CONFIG);
 const auth = firebase.auth();
 
-// ── AUTH STATE ───────────────────────────────────────────────────────────────
+// ── AUTH STATE ───────────────────────────────────────────────────────────
 auth.onAuthStateChanged(user => {
-  if (!user) {
-    show("screen-login");
-    return;
-  }
+  if (!user) { showScreen("screen-login"); return; }
 
-  // Check admin
-  if (user.email !== ADMIN_EMAIL) {
+  if (user.email !== GLOBAL.ADMIN_EMAIL) {
     auth.signOut();
     showScreen("screen-login");
     showAlert("loginAlert", "loginAlertMsg", "Acceso denegado. Esta cuenta no tiene permisos de administrador.");
     return;
   }
 
-  document.getElementById("topbarEmail").textContent = user.email;
+  // Set sidebar info
+  document.getElementById("sidebarEmail").textContent  = user.email;
+  document.getElementById("sidebarAvatar").textContent = user.email[0].toUpperCase();
 
-  // Check if we already have the key in localStorage
+  // Check saved key
   const savedUrl    = localStorage.getItem("no_db_url");
   const savedSecret = localStorage.getItem("no_db_secret");
 
   if (savedUrl && savedSecret) {
     db_url    = savedUrl;
     db_secret = savedSecret;
-    show("screen-dashboard");
-    loadUsers();
+    showScreen("screen-dashboard");
+    initDashboard();
   } else {
-    show("screen-key");
+    showScreen("screen-key");
   }
 });
 
-// ── HELPERS ──────────────────────────────────────────────────────────────────
-function show(id) {
+// ═══════════════════════════════════════════════════════════════════════
+// ── HELPERS
+// ═══════════════════════════════════════════════════════════════════════
+function showScreen(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
@@ -994,49 +1168,55 @@ function showAlert(alertId, msgId, msg) {
   document.getElementById(msgId).textContent = msg;
   el.classList.add("show");
 }
-
-function hideAlert(alertId) {
-  document.getElementById(alertId).classList.remove("show");
-}
+function hideAlert(id) { document.getElementById(id).classList.remove("show"); }
 
 function toast(msg, type = "success") {
   const c = document.getElementById("toastContainer");
   const t = document.createElement("div");
   t.className = `toast toast-${type}`;
-  t.innerHTML = type === "success"
-    ? `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>${msg}`
-    : `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${msg}`;
+  const icons = {
+    success: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`,
+    error:   `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    info:    `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8"/><path stroke-linecap="round" d="M12 12v4"/></svg>`
+  };
+  t.innerHTML = (icons[type] || icons.info) + msg;
   c.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 }
 
 function togglePw(inputId, btn) {
   const inp = document.getElementById(inputId);
-  const show = inp.type === "password";
-  inp.type = show ? "text" : "password";
-  btn.style.color = show ? "var(--blue-light)" : "var(--text-faint)";
+  const vis = inp.type === "password";
+  inp.type = vis ? "text" : "password";
+  btn.style.color = vis ? "var(--blue-light)" : "var(--text-faint)";
 }
 
-function setLoading(btnId, loading) {
+function setLoading(btnId, loading, label) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
   btn.disabled = loading;
   if (loading) {
     btn._orig = btn.innerHTML;
-    btn.innerHTML = `<div class="spinner"></div> Procesando...`;
+    btn.innerHTML = `<div class="spinner"></div> ${label || "Procesando..."}`;
   } else {
     btn.innerHTML = btn._orig || btn.innerHTML;
   }
 }
 
-function openModal(id) { document.getElementById(id).classList.add("show"); }
+function openModal(id)  { document.getElementById(id).classList.add("show"); }
 function closeModal(id) { document.getElementById(id).classList.remove("show"); }
 
 function fmtBytes(bytes) {
   if (!bytes || bytes === 0) return "0 B";
-  const k = 1024, sizes = ["B","KB","MB","GB"];
+  const k = 1024, s = ["B","KB","MB","GB","TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + s[i];
+}
+
+function fmtMB(mb) {
+  if (!mb && mb !== 0) return "—";
+  if (mb >= 1024) return (mb / 1024).toFixed(mb % 1024 === 0 ? 0 : 1) + " GB";
+  return mb + " MB";
 }
 
 function fmtDate(ts) {
@@ -1044,42 +1224,57 @@ function fmtDate(ts) {
   return new Date(ts).toLocaleDateString("es-ES", { day:"2-digit", month:"short", year:"numeric" });
 }
 
-function isExpired(ts) {
-  if (!ts) return false;
-  return Date.now() > ts;
+function isExpired(ts) { return ts ? Date.now() > ts : false; }
+
+// ── DB FETCH helper ──────────────────────────────────────────────────────
+async function dbFetch(path, method = "GET", body = null) {
+  const url = `${db_url}/${path}.json?auth=${encodeURIComponent(db_secret)}`;
+  const opts = { method, signal: AbortSignal.timeout(GLOBAL.FETCH_TIMEOUT_SEC * 1000) };
+  if (body !== null) {
+    opts.headers = { "Content-Type": "application/json" };
+    opts.body = JSON.stringify(body);
+  }
+  const res = await fetch(url, opts);
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem("no_db_url");
+    localStorage.removeItem("no_db_secret");
+    showScreen("screen-key");
+    showAlert("keyAlert", "keyAlertMsg", "Sesión expirada. Ingresa la clave nuevamente.");
+    throw new Error("Unauthorized");
+  }
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return res.json();
 }
 
-// ── LOGIN ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// ── LOGIN
+// ═══════════════════════════════════════════════════════════════════════
 async function doLogin() {
   const email = document.getElementById("loginEmail").value.trim();
   const pass  = document.getElementById("loginPassword").value;
   hideAlert("loginAlert");
 
-  if (!email || !pass) {
-    showAlert("loginAlert", "loginAlertMsg", "Completa todos los campos.");
+  if (!email || !pass) { showAlert("loginAlert","loginAlertMsg","Completa todos los campos."); return; }
+
+  // Pre-check before hitting Firebase
+  if (email !== GLOBAL.ADMIN_EMAIL) {
+    showAlert("loginAlert","loginAlertMsg","Esta cuenta no tiene permisos de administrador.");
     return;
   }
 
-  // Pre-check admin email before even trying Firebase
-  if (email !== ADMIN_EMAIL) {
-    showAlert("loginAlert", "loginAlertMsg", "Esta cuenta no tiene permisos de administrador.");
-    return;
-  }
-
-  setLoading("loginBtn", true);
+  setLoading("loginBtn", true, "Verificando...");
   try {
     await auth.signInWithEmailAndPassword(email, pass);
-    // onAuthStateChanged handles the redirect
   } catch(e) {
     setLoading("loginBtn", false);
     const msgs = {
-      "auth/user-not-found":   "No existe una cuenta con ese correo.",
-      "auth/wrong-password":   "Contrasena incorrecta.",
-      "auth/invalid-email":    "Correo no valido.",
-      "auth/too-many-requests":"Demasiados intentos. Intenta mas tarde.",
+      "auth/user-not-found":    "No existe una cuenta con ese correo.",
+      "auth/wrong-password":    "Contraseña incorrecta.",
+      "auth/invalid-email":     "Correo no válido.",
+      "auth/too-many-requests": "Demasiados intentos. Intenta más tarde.",
       "auth/invalid-credential":"Credenciales incorrectas."
     };
-    showAlert("loginAlert", "loginAlertMsg", msgs[e.code] || "Error: " + e.message);
+    showAlert("loginAlert","loginAlertMsg", msgs[e.code] || "Error: " + e.message);
   }
 }
 
@@ -1087,14 +1282,16 @@ document.getElementById("loginPassword").addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.nativeEvent?.isComposing) doLogin();
 });
 
-// ── DB URL PREVIEW ───────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// ── DB KEY VERIFICATION
+// ═══════════════════════════════════════════════════════════════════════
 function updatePreview() {
   const url    = document.getElementById("dbUrl").value.trim();
   const secret = document.getElementById("dbSecret").value.trim();
   const box    = document.getElementById("previewUrl");
   if (url && secret) {
     const clean = url.replace(/\/$/, "");
-    box.textContent = `${clean}/users.json?auth=${secret.substring(0,8)}...`;
+    box.textContent = `GET ${clean}/users.json?auth=${secret.substring(0,8)}...`;
     box.style.display = "block";
   } else {
     box.style.display = "none";
@@ -1103,57 +1300,38 @@ function updatePreview() {
 document.getElementById("dbUrl").addEventListener("input", updatePreview);
 document.getElementById("dbSecret").addEventListener("input", updatePreview);
 
-// ── VERIFY KEY ───────────────────────────────────────────────────────────────
 async function verifyKey() {
   const url    = document.getElementById("dbUrl").value.trim().replace(/\/$/, "");
   const secret = document.getElementById("dbSecret").value.trim();
   hideAlert("keyAlert");
 
-  if (!url) {
-    showAlert("keyAlert", "keyAlertMsg", "Ingresa la URL de la base de datos.");
-    return;
-  }
-  if (!url.startsWith("https://") || !url.includes("firebaseio.com")) {
-    showAlert("keyAlert", "keyAlertMsg", "La URL debe ser una URL valida de Firebase Realtime Database (https://...).");
-    return;
-  }
-  if (!secret) {
-    showAlert("keyAlert", "keyAlertMsg", "Ingresa la clave secreta.");
-    return;
-  }
-  if (secret.length < 20) {
-    showAlert("keyAlert", "keyAlertMsg", "La clave parece demasiado corta. Verifica que sea la clave secreta correcta.");
-    return;
-  }
+  if (!url)                               { showAlert("keyAlert","keyAlertMsg","Ingresa la URL de la base de datos."); return; }
+  if (!url.startsWith("https://") || !url.includes("firebaseio.com"))
+                                          { showAlert("keyAlert","keyAlertMsg","La URL debe ser una URL válida de Firebase Realtime Database."); return; }
+  if (!secret)                            { showAlert("keyAlert","keyAlertMsg","Ingresa la clave secreta."); return; }
+  if (secret.length < 20)                 { showAlert("keyAlert","keyAlertMsg","La clave parece demasiado corta. Verifica que sea la Database Secret correcta."); return; }
 
-  setLoading("keyBtn", true);
+  setLoading("keyBtn", true, "Verificando clave...");
   try {
-    // Test the key by fetching .json with auth
     const resp = await fetch(`${url}/.json?auth=${encodeURIComponent(secret)}&shallow=true`, {
       method: "GET",
       signal: AbortSignal.timeout(8000)
     });
+    if (resp.status === 401 || resp.status === 403) throw new Error("Clave incorrecta o sin permisos suficientes.");
+    if (!resp.ok && resp.status !== 404)            throw new Error(`Error del servidor: ${resp.status}`);
 
-    if (resp.status === 401 || resp.status === 403) {
-      throw new Error("Clave incorrecta o sin permisos suficientes.");
-    }
-    if (!resp.ok && resp.status !== 404) {
-      throw new Error(`Error del servidor: ${resp.status}`);
-    }
-
-    // Key valid — save to localStorage so persists across sessions
+    // Guardar en localStorage
     db_url    = url;
     db_secret = secret;
-    localStorage.setItem("no_db_url", url);
+    localStorage.setItem("no_db_url",    url);
     localStorage.setItem("no_db_secret", secret);
 
     setLoading("keyBtn", false);
-    show("screen-dashboard");
-    loadUsers();
-
+    showScreen("screen-dashboard");
+    initDashboard();
   } catch(e) {
     setLoading("keyBtn", false);
-    showAlert("keyAlert", "keyAlertMsg", e.message || "No se pudo verificar la clave. Revisa la URL y la clave.");
+    showAlert("keyAlert","keyAlertMsg", e.message || "No se pudo verificar la clave.");
   }
 }
 
@@ -1161,147 +1339,199 @@ document.getElementById("dbSecret").addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.nativeEvent?.isComposing) verifyKey();
 });
 
-// ── FETCH USERS ──────────────────────────────────────────────────────────────
+function clearKey() {
+  localStorage.removeItem("no_db_url");
+  localStorage.removeItem("no_db_secret");
+  toast("Clave eliminada de localStorage.", "info");
+  setTimeout(() => { auth.signOut(); showScreen("screen-login"); }, 800);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ── NAVIGATION
+// ═══════════════════════════════════════════════════════════════════════
+const VIEW_TITLES = {
+  overview: "Resumen",
+  users:    "Usuarios",
+  config:   "Config Global",
+  plans:    "Planes",
+  security: "Seguridad"
+};
+
+function goTo(view) {
+  currentView = view;
+  document.querySelectorAll(".adm-view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".adm-nav-link").forEach(l => l.classList.remove("active"));
+  const viewEl = document.getElementById("view-" + view);
+  if (viewEl) viewEl.classList.add("active");
+  const navEl = document.getElementById("nav-" + view);
+  if (navEl) navEl.classList.add("active");
+  document.getElementById("topbarTitle").textContent = VIEW_TITLES[view] || view;
+
+  if (view === "overview") { renderStats(); renderOverviewTable(); }
+  if (view === "users")    { renderFullTable(allUsers); }
+  if (view === "config")   { loadConfig(); }
+  if (view === "plans")    { renderPlansEdit(); }
+  if (view === "security") { renderSecurity(); }
+}
+
+function refreshAll() {
+  loadUsers().then(() => { if (currentView === "config") loadConfig(); if (currentView === "security") renderSecurity(); });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ── INIT DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════
+async function initDashboard() {
+  document.getElementById("cfgDbUrlDisplay").textContent  = db_url;
+  document.getElementById("cfgSessionUrl").value          = db_url;
+  await loadUsers();
+  goTo("overview");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ── LOAD USERS
+// ═══════════════════════════════════════════════════════════════════════
 async function loadUsers() {
   try {
-    const resp = await fetch(`${db_url}/users.json?auth=${encodeURIComponent(db_secret)}`);
-    if (!resp.ok) {
-      if (resp.status === 401 || resp.status === 403) {
-        // Key expired or invalid, go back to key screen
-        localStorage.removeItem("no_db_url");
-        localStorage.removeItem("no_db_secret");
-        show("screen-key");
-        showAlert("keyAlert", "keyAlertMsg", "La sesion expiro o la clave ya no es valida. Ingresala de nuevo.");
-        return;
-      }
-      throw new Error("HTTP " + resp.status);
-    }
-
-    const data = await resp.json();
+    const data = await dbFetch("users");
     allUsers = data ? Object.entries(data).map(([uid, val]) => ({ uid, ...val })) : [];
+    document.getElementById("sidebarUserCount").textContent = allUsers.length;
+    document.getElementById("usersCountBadge").textContent  = allUsers.length;
     renderStats();
-    renderTable(allUsers);
+    if (currentView === "users")    renderFullTable(allUsers);
+    if (currentView === "overview") renderOverviewTable();
+    if (currentView === "security") renderSecurity();
   } catch(e) {
-    document.getElementById("usersTableBody").innerHTML =
-      `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--red);">Error al cargar usuarios: ${e.message}</td></tr>`;
+    if (e.message !== "Unauthorized")
+      toast("Error al cargar usuarios: " + e.message, "error");
   }
 }
 
-function refreshData() {
-  document.getElementById("usersTableBody").innerHTML =
-    `<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text-faint);">Actualizando...</td></tr>`;
-  loadUsers();
-}
-
-// ── STATS ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// ── STATS
+// ═══════════════════════════════════════════════════════════════════════
 function renderStats() {
   const total   = allUsers.length;
-  const active  = allUsers.filter(u => !isExpired(u.planExpiry) || u.plan === "free").length;
+  const active  = allUsers.filter(u => !u.blocked && (!isExpired(u.planExpiry) || !u.planExpiry)).length;
   const expired = allUsers.filter(u => u.plan !== "free" && isExpired(u.planExpiry)).length;
-  let totalBytes = 0;
+  let   totalBytes = 0;
   allUsers.forEach(u => { totalBytes += (u.storageUsed || 0); });
 
-  document.getElementById("statTotalUsers").textContent  = total;
-  document.getElementById("statActivePlans").textContent = active;
-  document.getElementById("statExpired").textContent     = expired;
-  document.getElementById("statStorage").textContent     = fmtBytes(totalBytes);
+  document.getElementById("statTotal").textContent   = total;
+  document.getElementById("statActive").textContent  = active;
+  document.getElementById("statExpired").textContent = expired;
+  document.getElementById("statStorage").textContent = fmtBytes(totalBytes);
 }
 
-// ── TABLE ────────────────────────────────────────────────────────────────────
-function renderTable(users) {
+// ═══════════════════════════════════════════════════════════════════════
+// ── TABLE RENDERING
+// ═══════════════════════════════════════════════════════════════════════
+function userRowHTML(u) {
+  const plan      = u.plan || "free";
+  const expiry    = u.planExpiry || null;
+  const expired   = plan !== "free" && isExpired(expiry);
+  const blocked   = u.blocked === true || u.blocked === "true";
+  const planDef   = GLOBAL.PLANS[plan] || GLOBAL.PLANS.free;
+  const limitMB   = u.storageLimit || planDef.storageMB;
+  const usedBytes = u.storageUsed || 0;
+  const usedMB    = usedBytes / (1024 * 1024);
+  const pct       = Math.min(100, Math.round((usedMB / limitMB) * 100));
+  const barCls    = pct >= 95 ? "full" : pct >= 75 ? "warn" : "";
+
+  let stsCls, stsLbl;
+  if (blocked)      { stsCls = "blocked"; stsLbl = "Bloqueado"; }
+  else if (expired) { stsCls = "expired"; stsLbl = "Vencido";   }
+  else              { stsCls = "active";  stsLbl = "Activo";    }
+
+  const email   = u.email || u.uid;
+  const initial = (u.email || "?")[0].toUpperCase();
+  const planColor = planDef.color || "#64748b";
+
+  return `<tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">${initial}</div>
+        <div>
+          <div style="font-size:13px;font-weight:500;">${email}</div>
+          <div style="font-size:10.5px;color:var(--text-faint);font-family:monospace;">${u.uid.substring(0,16)}...</div>
+        </div>
+      </div>
+    </td>
+    <td><span class="plan-badge ${plan}">${plan}</span></td>
+    <td><span class="status-dot ${stsCls}">${stsLbl}</span></td>
+    <td style="font-size:12px;color:var(--text-muted);">${expiry ? fmtDate(expiry) : plan === "free" ? "Sin venc." : "—"}</td>
+    <td>
+      <div class="mini-bar-wrap">
+        <div style="font-size:11px;color:var(--text-muted);">${fmtBytes(usedBytes)} / ${fmtMB(limitMB)} (${pct}%)</div>
+        <div class="mini-bar"><div class="mini-bar-fill ${barCls}" style="width:${pct}%;"></div></div>
+      </div>
+    </td>
+    <td>
+      <div class="row-actions">
+        <button class="action-btn edit" onclick="openEditModal('${u.uid}')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          Editar
+        </button>
+        <button class="action-btn ${blocked ? 'success' : 'danger'}" onclick="confirmToggleBlock('${u.uid}','${email}',${blocked})">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          ${blocked ? "Desbloquear" : "Bloquear"}
+        </button>
+      </div>
+    </td>
+  </tr>`;
+}
+
+function renderOverviewTable() {
+  const tbody = document.getElementById("overviewTableBody");
+  const slice = allUsers.slice(-8).reverse();
+  tbody.innerHTML = slice.length ? slice.map(userRowHTML).join("") :
+    `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-faint);">No hay usuarios registrados.</td></tr>`;
+}
+
+function renderFullTable(users) {
   const tbody = document.getElementById("usersTableBody");
-  if (!users.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-faint);">No hay usuarios registrados.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = users.map(u => {
-    const plan       = u.plan || "free";
-    const expiry     = u.planExpiry || null;
-    const expired    = plan !== "free" && isExpired(expiry);
-    const blocked    = u.blocked === true || u.blocked === "true";
-    const limitMB    = u.storageLimit || PLAN_LIMITS[plan] || 500;
-    const usedBytes  = u.storageUsed || 0;
-    const usedMB     = usedBytes / (1024 * 1024);
-    const pct        = Math.min(100, Math.round((usedMB / limitMB) * 100));
-    const barClass   = pct >= 95 ? "full" : pct >= 75 ? "warn" : "";
-
-    let statusClass, statusLabel;
-    if (blocked) { statusClass = "blocked"; statusLabel = "Bloqueado"; }
-    else if (expired) { statusClass = "expired"; statusLabel = "Vencido"; }
-    else { statusClass = "active"; statusLabel = "Activo"; }
-
-    const email = u.email || u.uid;
-    const initial = (u.email || "?")[0].toUpperCase();
-
-    return `
-    <tr>
-      <td>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">${initial}</div>
-          <div>
-            <div style="font-size:13px;font-weight:500;">${email}</div>
-            <div style="font-size:11px;color:var(--text-faint);font-family:monospace;">${u.uid.substring(0,16)}...</div>
-          </div>
-        </div>
-      </td>
-      <td><span class="plan-badge ${plan}">${plan}</span></td>
-      <td><span class="status-dot ${statusClass}">${statusLabel}</span></td>
-      <td style="font-size:12px;color:var(--text-muted);">${expiry ? fmtDate(expiry) : plan === "free" ? "Sin vencimiento" : "—"}</td>
-      <td>
-        <div class="mini-storage">
-          <div style="font-size:11px;color:var(--text-muted);">${fmtBytes(usedBytes)} / ${limitMB >= 1024 ? (limitMB/1024).toFixed(0)+"GB" : limitMB+"MB"} (${pct}%)</div>
-          <div class="mini-storage-bar"><div class="mini-storage-fill ${barClass}" style="width:${pct}%;"></div></div>
-        </div>
-      </td>
-      <td>
-        <div class="row-actions">
-          <button class="action-btn edit" onclick="openEditModal('${u.uid}')">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-            Editar
-          </button>
-          <button class="action-btn danger" onclick="confirmAction('${u.uid}','block','${email}')">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-            ${blocked ? "Desbloquear" : "Bloquear"}
-          </button>
-        </div>
-      </td>
-    </tr>`;
-  }).join("");
+  tbody.innerHTML = users.length ? users.map(userRowHTML).join("") :
+    `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-faint);">No hay usuarios.</td></tr>`;
 }
 
 function filterUsers() {
   const q = document.getElementById("searchInput").value.toLowerCase();
-  const filtered = allUsers.filter(u =>
+  renderFullTable(allUsers.filter(u =>
     (u.email || "").toLowerCase().includes(q) || u.uid.toLowerCase().includes(q)
-  );
-  renderTable(filtered);
+  ));
 }
 
-// ── EDIT MODAL ───────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// ── EDIT MODAL
+// ═══════════════════════════════════════════════════════════════════════
 function openEditModal(uid) {
   const u = allUsers.find(x => x.uid === uid);
   if (!u) return;
   editingUid = uid;
+  const plan    = u.plan || "free";
+  const planDef = GLOBAL.PLANS[plan] || GLOBAL.PLANS.free;
 
-  const plan = u.plan || "free";
-  document.getElementById("editAvatar").textContent = (u.email || "?")[0].toUpperCase();
-  document.getElementById("editEmail").textContent  = u.email || uid;
-  document.getElementById("editUid").textContent    = uid;
-  document.getElementById("editPlan").value         = plan;
-  document.getElementById("editBlocked").value      = String(u.blocked === true || u.blocked === "true");
-  document.getElementById("editStorageLimit").value = u.storageLimit || PLAN_LIMITS[plan] || 500;
+  document.getElementById("editAvatar").textContent        = (u.email || "?")[0].toUpperCase();
+  document.getElementById("editEmail").textContent         = u.email || uid;
+  document.getElementById("editUid").textContent           = uid;
+  document.getElementById("editPlan").value                = plan;
+  document.getElementById("editBlocked").value             = String(u.blocked === true || u.blocked === "true");
+  document.getElementById("editStorageLimit").value        = u.storageLimit || planDef.storageMB;
+  document.getElementById("editMaxFileMB").value           = u.maxFileMB    || planDef.maxFileMB;
+  document.getElementById("editMaxFiles").value            = u.maxFiles !== undefined ? u.maxFiles : planDef.maxFiles;
 
   if (u.planExpiry) {
-    const d = new Date(u.planExpiry);
-    document.getElementById("editExpiry").value = d.toISOString().split("T")[0];
+    document.getElementById("editExpiry").value = new Date(u.planExpiry).toISOString().split("T")[0];
   } else {
     document.getElementById("editExpiry").value = "";
   }
 
-  // Update limit when plan changes
+  // Auto-fill defaults when plan changes
   document.getElementById("editPlan").onchange = function() {
-    document.getElementById("editStorageLimit").value = PLAN_LIMITS[this.value] || 500;
+    const pd = GLOBAL.PLANS[this.value] || GLOBAL.PLANS.free;
+    document.getElementById("editStorageLimit").value = pd.storageMB;
+    document.getElementById("editMaxFileMB").value    = pd.maxFileMB;
+    document.getElementById("editMaxFiles").value     = pd.maxFiles;
   };
 
   openModal("modalEdit");
@@ -1309,81 +1539,304 @@ function openEditModal(uid) {
 
 async function saveUserEdit() {
   if (!editingUid) return;
-  const plan    = document.getElementById("editPlan").value;
-  const expiry  = document.getElementById("editExpiry").value;
-  const limit   = parseInt(document.getElementById("editStorageLimit").value, 10);
-  const blocked = document.getElementById("editBlocked").value === "true";
+  const plan       = document.getElementById("editPlan").value;
+  const expiry     = document.getElementById("editExpiry").value;
+  const limit      = parseInt(document.getElementById("editStorageLimit").value, 10);
+  const maxFileMB  = parseInt(document.getElementById("editMaxFileMB").value, 10);
+  const maxFiles   = parseInt(document.getElementById("editMaxFiles").value, 10);
+  const blocked    = document.getElementById("editBlocked").value === "true";
 
-  if (!plan) { toast("Selecciona un plan.", "error"); return; }
-  if (isNaN(limit) || limit < 1) { toast("Limite de almacenamiento invalido.", "error"); return; }
+  if (!plan)              { toast("Selecciona un plan.", "error"); return; }
+  if (isNaN(limit) || limit < 1)      { toast("Límite de almacenamiento inválido.", "error"); return; }
+  if (isNaN(maxFileMB) || maxFileMB < 1) { toast("Tamaño máximo inválido.", "error"); return; }
 
-  const expiryTs = expiry ? new Date(expiry).getTime() : null;
+  const expiryTs = expiry ? new Date(expiry + "T23:59:59").getTime() : null;
+  const updates  = { plan, storageLimit: limit, blocked, maxFileMB, maxFiles: isNaN(maxFiles) ? 0 : maxFiles };
+  updates.planExpiry = expiryTs;
 
-  const updates = { plan, storageLimit: limit, blocked };
-  if (expiryTs) updates.planExpiry = expiryTs;
-  else updates.planExpiry = null;
-
-  setLoading("saveEditBtn", true);
+  setLoading("saveEditBtn", true, "Guardando...");
   try {
-    const resp = await fetch(`${db_url}/users/${editingUid}.json?auth=${encodeURIComponent(db_secret)}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates)
-    });
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    await dbFetch(`users/${editingUid}`, "PATCH", updates);
 
-    // Update local state
     const idx = allUsers.findIndex(u => u.uid === editingUid);
     if (idx !== -1) Object.assign(allUsers[idx], updates);
+
     renderStats();
-    renderTable(allUsers);
+    if (currentView === "users")    renderFullTable(allUsers);
+    if (currentView === "overview") renderOverviewTable();
 
     closeModal("modalEdit");
     toast("Usuario actualizado correctamente.");
   } catch(e) {
-    toast("Error al guardar: " + e.message, "error");
+    if (e.message !== "Unauthorized") toast("Error al guardar: " + e.message, "error");
   } finally {
     setLoading("saveEditBtn", false);
   }
 }
 
-// ── BLOCK / UNBLOCK ──────────────────────────────────────────────────────────
-function confirmAction(uid, action, email) {
-  const u = allUsers.find(x => x.uid === uid);
-  if (!u) return;
-  const isBlocked = u.blocked === true || u.blocked === "true";
+// ═══════════════════════════════════════════════════════════════════════
+// ── BLOCK / UNBLOCK
+// ═══════════════════════════════════════════════════════════════════════
+function confirmToggleBlock(uid, email, isBlocked) {
   const label = isBlocked ? "desbloquear" : "bloquear";
-  document.getElementById("deleteMsg").textContent =
-    `¿Seguro que deseas ${label} al usuario ${email}?`;
-  document.getElementById("confirmDeleteBtn").onclick = () => toggleBlock(uid, !isBlocked);
-  openModal("modalDelete");
+  document.getElementById("confirmTitle").textContent = isBlocked ? "Desbloquear usuario" : "Bloquear usuario";
+  document.getElementById("confirmMsg").textContent   = `¿Seguro que deseas ${label} al usuario ${email}?`;
+  document.getElementById("confirmActionBtn").onclick = () => toggleBlock(uid, !isBlocked);
+  openModal("modalConfirm");
 }
 
 async function toggleBlock(uid, block) {
   try {
-    const resp = await fetch(`${db_url}/users/${uid}.json?auth=${encodeURIComponent(db_secret)}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ blocked: block })
-    });
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    await dbFetch(`users/${uid}`, "PATCH", { blocked: block });
     const idx = allUsers.findIndex(u => u.uid === uid);
     if (idx !== -1) allUsers[idx].blocked = block;
     renderStats();
-    renderTable(allUsers);
-    closeModal("modalDelete");
+    renderFullTable(allUsers);
+    if (currentView === "overview") renderOverviewTable();
+    closeModal("modalConfirm");
     toast(block ? "Usuario bloqueado." : "Usuario desbloqueado.");
   } catch(e) {
-    toast("Error: " + e.message, "error");
+    if (e.message !== "Unauthorized") toast("Error: " + e.message, "error");
   }
 }
 
-// ── LOGOUT ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// ── CONFIG GLOBAL
+// ═══════════════════════════════════════════════════════════════════════
+async function loadConfig() {
+  // Fill form fields from GLOBAL (fallback) or from DB if saved
+  document.getElementById("cfgWorkerUrl").value     = GLOBAL.WORKER_URL;
+  document.getElementById("cfgAdminEmail").value    = GLOBAL.ADMIN_EMAIL;
+  document.getElementById("cfgFilesUrl").value      = GLOBAL.FILES_BASE_URL;
+  document.getElementById("cfgFreeStorage").value   = GLOBAL.FREE_STORAGE_MB;
+  document.getElementById("cfgFreeMaxFile").value   = GLOBAL.FREE_MAX_FILE_MB;
+  document.getElementById("cfgFreeMaxFiles").value  = GLOBAL.FREE_MAX_FILES;
+  document.getElementById("cfgMaxFilenameLen").value= GLOBAL.MAX_FILENAME_LEN;
+  document.getElementById("cfgReplayWindow").value  = GLOBAL.REPLAY_WINDOW_MIN;
+  document.getElementById("cfgFetchTimeout").value  = GLOBAL.FETCH_TIMEOUT_SEC;
+
+  // Try to read from DB config/ node and override
+  try {
+    const cfg = await dbFetch("config");
+    if (cfg) {
+      if (cfg.workerUrl)      document.getElementById("cfgWorkerUrl").value      = cfg.workerUrl;
+      if (cfg.adminEmail)     document.getElementById("cfgAdminEmail").value     = cfg.adminEmail;
+      if (cfg.filesBaseUrl)   document.getElementById("cfgFilesUrl").value       = cfg.filesBaseUrl;
+      if (cfg.freeStorageMB)  document.getElementById("cfgFreeStorage").value    = cfg.freeStorageMB;
+      if (cfg.freeMaxFileMB)  document.getElementById("cfgFreeMaxFile").value    = cfg.freeMaxFileMB;
+      if (cfg.freeMaxFiles !== undefined) document.getElementById("cfgFreeMaxFiles").value  = cfg.freeMaxFiles;
+      if (cfg.maxFilenameLen) document.getElementById("cfgMaxFilenameLen").value = cfg.maxFilenameLen;
+      if (cfg.replayWindowMin)document.getElementById("cfgReplayWindow").value   = cfg.replayWindowMin;
+      if (cfg.fetchTimeoutSec)document.getElementById("cfgFetchTimeout").value   = cfg.fetchTimeoutSec;
+
+      // Override GLOBAL in memory
+      if (cfg.workerUrl)     GLOBAL.WORKER_URL       = cfg.workerUrl;
+      if (cfg.filesBaseUrl)  GLOBAL.FILES_BASE_URL   = cfg.filesBaseUrl;
+    }
+  } catch(_) {}
+
+  renderGlobalVars();
+}
+
+async function saveConfig(section) {
+  let updates = {};
+
+  if (section === "access") {
+    updates = {
+      workerUrl:    document.getElementById("cfgWorkerUrl").value.trim(),
+      adminEmail:   document.getElementById("cfgAdminEmail").value.trim(),
+      filesBaseUrl: document.getElementById("cfgFilesUrl").value.trim()
+    };
+    if (!updates.workerUrl || !updates.adminEmail) { toast("Completa todos los campos.", "error"); return; }
+  }
+
+  if (section === "limits") {
+    updates = {
+      freeStorageMB:  parseInt(document.getElementById("cfgFreeStorage").value, 10),
+      freeMaxFileMB:  parseInt(document.getElementById("cfgFreeMaxFile").value, 10),
+      freeMaxFiles:   parseInt(document.getElementById("cfgFreeMaxFiles").value, 10),
+      maxFilenameLen: parseInt(document.getElementById("cfgMaxFilenameLen").value, 10),
+      replayWindowMin:parseInt(document.getElementById("cfgReplayWindow").value, 10),
+      fetchTimeoutSec:parseInt(document.getElementById("cfgFetchTimeout").value, 10)
+    };
+    for (const [k,v] of Object.entries(updates)) {
+      if (isNaN(v) || v < 0) { toast(`Valor inválido en "${k}".`, "error"); return; }
+    }
+    // Sync GLOBAL in memory
+    GLOBAL.FREE_STORAGE_MB   = updates.freeStorageMB;
+    GLOBAL.FREE_MAX_FILE_MB  = updates.freeMaxFileMB;
+    GLOBAL.FREE_MAX_FILES    = updates.freeMaxFiles;
+    GLOBAL.MAX_FILENAME_LEN  = updates.maxFilenameLen;
+    GLOBAL.REPLAY_WINDOW_MIN = updates.replayWindowMin;
+    GLOBAL.FETCH_TIMEOUT_SEC = updates.fetchTimeoutSec;
+  }
+
+  try {
+    await dbFetch("config", "PATCH", updates);
+    toast("Configuración guardada en Firebase.", "success");
+    renderGlobalVars();
+  } catch(e) {
+    if (e.message !== "Unauthorized") toast("Error: " + e.message, "error");
+  }
+}
+
+function renderGlobalVars() {
+  const el = document.getElementById("globalVarsList");
+  const vars = [
+    ["WORKER_URL",       GLOBAL.WORKER_URL,          "str"],
+    ["FILES_BASE_URL",   GLOBAL.FILES_BASE_URL,       "str"],
+    ["FREE_STORAGE_MB",  GLOBAL.FREE_STORAGE_MB + " MB", "num"],
+    ["FREE_MAX_FILE_MB", GLOBAL.FREE_MAX_FILE_MB + " MB","num"],
+    ["FREE_MAX_FILES",   GLOBAL.FREE_MAX_FILES === 0 ? "ilimitado" : GLOBAL.FREE_MAX_FILES, "num"],
+    ["MAX_FILENAME_LEN", GLOBAL.MAX_FILENAME_LEN + " chars", "num"],
+    ["REPLAY_WINDOW",    GLOBAL.REPLAY_WINDOW_MIN + " min", "num"],
+    ["FETCH_TIMEOUT",    GLOBAL.FETCH_TIMEOUT_SEC + " seg",  "num"],
+    ["PLANS.free.storageMB",    GLOBAL.PLANS.free.storageMB    + " MB", "num"],
+    ["PLANS.pro.storageMB",     GLOBAL.PLANS.pro.storageMB     + " MB", "num"],
+    ["PLANS.business.storageMB",GLOBAL.PLANS.business.storageMB+ " MB", "num"],
+  ];
+  el.innerHTML = vars.map(([k, v, t]) =>
+    `<div class="var-item"><span class="var-key">${k}</span><span class="var-val ${t}">${v}</span></div>`
+  ).join("");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ── PLANS EDIT
+// ═══════════════════════════════════════════════════════════════════════
+function renderPlansEdit() {
+  const grid = document.getElementById("plansEditGrid");
+  grid.innerHTML = Object.entries(GLOBAL.PLANS).map(([key, plan]) => `
+    <div class="plan-edit-card">
+      <div class="plan-edit-header">
+        <div class="plan-edit-dot" style="background:${plan.color};box-shadow:0 0 8px ${plan.color}44;"></div>
+        <div class="plan-edit-name">${plan.name}</div>
+        <span style="margin-left:auto;font-size:11px;color:var(--text-faint);">${key}</span>
+      </div>
+      <div class="plan-edit-body">
+        <div class="cfg-field">
+          <label>Nombre</label>
+          <input class="cfg-input" id="pln_${key}_name" value="${plan.name}">
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-field">
+            <label>Storage (MB)</label>
+            <input class="cfg-input" type="number" id="pln_${key}_storageMB" value="${plan.storageMB}">
+          </div>
+          <div class="cfg-field">
+            <label>Max file (MB)</label>
+            <input class="cfg-input" type="number" id="pln_${key}_maxFileMB" value="${plan.maxFileMB}">
+          </div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-field">
+            <label>Max archivos</label>
+            <input class="cfg-input" type="number" id="pln_${key}_maxFiles" value="${plan.maxFiles}" placeholder="0=ilimitado">
+          </div>
+          <div class="cfg-field">
+            <label>Precio</label>
+            <input class="cfg-input" id="pln_${key}_price" value="${plan.price}">
+          </div>
+        </div>
+        <div class="cfg-field">
+          <label>Color</label>
+          <input class="cfg-input" id="pln_${key}_color" value="${plan.color}" placeholder="#2563eb">
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function savePlans() {
+  const updates = {};
+  for (const key of Object.keys(GLOBAL.PLANS)) {
+    const storageMB = parseInt(document.getElementById(`pln_${key}_storageMB`).value, 10);
+    const maxFileMB = parseInt(document.getElementById(`pln_${key}_maxFileMB`).value, 10);
+    const maxFiles  = parseInt(document.getElementById(`pln_${key}_maxFiles`).value, 10);
+    if (isNaN(storageMB) || storageMB < 1) { toast(`Storage inválido para el plan ${key}.`, "error"); return; }
+    if (isNaN(maxFileMB) || maxFileMB < 1) { toast(`Max file inválido para el plan ${key}.`, "error"); return; }
+
+    const upd = {
+      name:      document.getElementById(`pln_${key}_name`).value.trim(),
+      storageMB, maxFileMB,
+      maxFiles:  isNaN(maxFiles) ? 0 : maxFiles,
+      price:     document.getElementById(`pln_${key}_price`).value.trim(),
+      color:     document.getElementById(`pln_${key}_color`).value.trim(),
+      period:    GLOBAL.PLANS[key].period,
+      features:  GLOBAL.PLANS[key].features
+    };
+    updates[key] = upd;
+    // Sync in memory
+    Object.assign(GLOBAL.PLANS[key], upd);
+  }
+
+  try {
+    await dbFetch("config/plans", "PUT", updates);
+    toast("Planes guardados correctamente en Firebase.", "success");
+    renderGlobalVars();
+  } catch(e) {
+    if (e.message !== "Unauthorized") toast("Error al guardar planes: " + e.message, "error");
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ── SECURITY VIEW
+// ═══════════════════════════════════════════════════════════════════════
+function renderSecurity() {
+  const now = Date.now();
+
+  // Status summary
+  const blocked     = allUsers.filter(u => u.blocked === true || u.blocked === "true");
+  const expired     = allUsers.filter(u => u.plan !== "free" && isExpired(u.planExpiry));
+  const highStorage = allUsers.filter(u => {
+    const planDef = GLOBAL.PLANS[u.plan] || GLOBAL.PLANS.free;
+    const limitMB = u.storageLimit || planDef.storageMB;
+    const usedMB  = (u.storageUsed || 0) / (1024 * 1024);
+    return limitMB > 0 && (usedMB / limitMB) >= 0.9;
+  });
+
+  document.getElementById("securityStatus").innerHTML = [
+    ["ADMIN_EMAIL",      GLOBAL.ADMIN_EMAIL,     "str"],
+    ["Usuarios totales", allUsers.length,         "num"],
+    ["Bloqueados",       blocked.length,          "num"],
+    ["Planes vencidos",  expired.length,          "num"],
+    ["Storage alto +90%",highStorage.length,      "num"],
+    ["DB URL activa",    db_url || "—",           "str"],
+    ["Clave en localStorage", localStorage.getItem("no_db_secret") ? "SI (guardada)" : "NO", "str"],
+    ["Anti-replay window", GLOBAL.REPLAY_WINDOW_MIN + " min", "num"],
+  ].map(([k,v,t]) => `<div class="var-item"><span class="var-key">${k}</span><span class="var-val ${t}">${v}</span></div>`).join("");
+
+  const renderList = (arr, containerId, emptyMsg) => {
+    const el = document.getElementById(containerId);
+    if (!arr.length) {
+      el.innerHTML = `<div style="font-size:13px;color:var(--text-faint);">${emptyMsg}</div>`;
+      return;
+    }
+    el.innerHTML = arr.map(u => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--dark-2);border-radius:8px;border:1px solid var(--border);">
+        <div>
+          <div style="font-size:12.5px;font-weight:500;">${u.email || u.uid.substring(0,20)+"..."}</div>
+          <div style="font-size:11px;color:var(--text-faint);">${u.plan || "free"} · ${fmtDate(u.planExpiry)}</div>
+        </div>
+        <button class="action-btn edit" onclick="openEditModal('${u.uid}');goTo('users');" style="font-size:11px;padding:4px 9px;">
+          Editar
+        </button>
+      </div>
+    `).join("");
+  };
+
+  renderList(blocked,     "blockedList",     "Ninguna cuenta bloqueada.");
+  renderList(expired,     "expiredList",     "Ningún plan vencido.");
+  renderList(highStorage, "highStorageList", "Ningún usuario cerca del límite.");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ── LOGOUT
+// ═══════════════════════════════════════════════════════════════════════
 async function doLogout() {
   localStorage.removeItem("no_db_url");
   localStorage.removeItem("no_db_secret");
   await auth.signOut();
-  show("screen-login");
+  showScreen("screen-login");
 }
 </script>
 </body>
